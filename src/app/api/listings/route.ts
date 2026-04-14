@@ -41,10 +41,12 @@ export async function GET(req: NextRequest) {
   const rentMax = Number(searchParams.get('rentMax') ?? 500000);
   const listingTypesParam = searchParams.get('listingTypes');
   const flatTypesParam = searchParams.get('flatTypes');
+  const furnishingStatusesParam = searchParams.get('furnishingStatuses');
   const statusParam = searchParams.get('status');
   const genderParam = searchParams.get('genderPreference');
   const listingTypes = listingTypesParam ? listingTypesParam.split(',') : [];
   const flatTypes = flatTypesParam ? flatTypesParam.split(',') : [];
+  const furnishingStatuses = furnishingStatusesParam ? furnishingStatusesParam.split(',') : [];
 
   let query = getSupabase()
     .from('listings')
@@ -62,6 +64,7 @@ export async function GET(req: NextRequest) {
 
   if (listingTypes.length > 0) query = query.in('listing_type', listingTypes);
   if (flatTypes.length > 0) query = query.in('flat_type', flatTypes);
+  if (furnishingStatuses.length > 0) query = query.in('furnishing_status', furnishingStatuses);
   if (statusParam) query = query.eq('status', statusParam);
   if (genderParam) query = query.eq('gender_preference', genderParam);
 

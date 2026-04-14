@@ -51,6 +51,7 @@ export interface ListingFilters {
   rentMax: number;
   listingTypes: ListingType[];
   flatTypes: FlatType[];
+  furnishingStatuses: FurnishingStatus[];
   status: AvailabilityStatus | 'ALL';
   genderPreference: GenderPreference | 'ALL';
 }

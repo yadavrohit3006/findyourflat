@@ -60,6 +60,9 @@ function buildKey(bounds: MapBounds | null, filters: ListingFilters): string | n
   if (filters.flatTypes.length > 0) {
     params.set('flatTypes', filters.flatTypes.join(','));
   }
+  if (filters.furnishingStatuses.length > 0) {
+    params.set('furnishingStatuses', filters.furnishingStatuses.join(','));
+  }
   if (filters.status !== 'ALL') {
     params.set('status', filters.status);
   }

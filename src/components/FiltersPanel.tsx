@@ -3,11 +3,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { cn, listingTypeLabel, flatTypeLabel } from '@/lib/utils';
-import type { ListingFilters, ListingType, FlatType } from '@/types';
+import type { ListingFilters, ListingType, FlatType, FurnishingStatus } from '@/types';
 import type { FiltersHook } from '@/hooks/useFilters';
 
 const LISTING_TYPES: ListingType[] = ['NEW_LISTING', 'REPLACEMENT'];
 const FLAT_TYPES: FlatType[] = ['1RK', '1BHK', '2BHK', '3BHK', '4BHK'];
+const FURNISHING_STATUSES: { value: FurnishingStatus; label: string }[] = [
+  { value: 'UNFURNISHED', label: 'Unfurnished' },
+  { value: 'SEMI_FURNISHED', label: 'Semi-Furnished' },
+  { value: 'FULLY_FURNISHED', label: 'Fully Furnished' },
+];
 
 const RENT_PRESETS = [
   { label: 'Any', min: 0, max: 100000 },
@@ -24,12 +29,27 @@ interface FiltersPanelProps {
 }
 
 export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProps) {
-  const { filters, updateFilters, resetFilters, toggleListingType, toggleFlatType, isActive } = hook;
+  const {
+    filters,
+    updateFilters,
+    resetFilters,
+    toggleListingType,
+    toggleFlatType,
+    toggleFurnishingStatus,
+    isActive,
+  } = hook;
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const activeRentPreset = RENT_PRESETS.find(
     (p) => p.min === filters.rentMin && p.max === filters.rentMax
   );
+
+  const activeFilterCount =
+    (filters.listingTypes.length > 0 ? 1 : 0) +
+    (filters.flatTypes.length > 0 ? 1 : 0) +
+    (filters.furnishingStatuses.length > 0 ? 1 : 0) +
+    (filters.status !== 'ALL' ? 1 : 0) +
+    (filters.rentMin > 0 || filters.rentMax < 100000 ? 1 : 0);
 
   const filterContent = (
     <div className="flex flex-col gap-4">
@@ -121,6 +141,27 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
         </div>
       </div>
 
+      {/* Furnishing Status */}
+      <div>
+        <p className="text-xs font-medium text-gray-700 mb-2">Furnishing</p>
+        <div className="flex flex-wrap gap-1.5">
+          {FURNISHING_STATUSES.map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => toggleFurnishingStatus(value)}
+              className={cn(
+                'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                filters.furnishingStatuses.includes(value)
+                  ? 'border-sky-600 bg-sky-600 text-white'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-sky-300 hover:text-sky-700'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Availability */}
       <div>
         <p className="text-xs font-medium text-gray-700 mb-2">Availability</p>
@@ -174,16 +215,16 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
   return (
     <>
       {/* Desktop: floating card */}
-      <div className="absolute left-4 top-4 z-10 hidden w-72 rounded-2xl bg-white p-4 shadow-map-card md:block">
+      <div className="absolute left-4 top-4 z-10 hidden w-72 rounded-2xl bg-white p-4 shadow-map-card md:block overflow-y-auto max-h-[calc(100vh-2rem)]">
         {filterContent}
       </div>
 
-      {/* Mobile: FAB + bottom sheet */}
-      <div className="absolute bottom-6 right-4 z-10 md:hidden">
+      {/* Mobile: fixed FAB — fixed so iOS 100vh/overflow-hidden doesn't clip it */}
+      <div className="fixed bottom-20 right-4 z-30 md:hidden">
         <button
           onClick={() => setMobileOpen(true)}
           className={cn(
-            'flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium shadow-map-card transition-colors',
+            'flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg transition-colors',
             isActive
               ? 'bg-sky-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -195,26 +236,22 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
           Filters
           {isActive && (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-sky-600">
-              {(filters.listingTypes.length > 0 ? 1 : 0) +
-                (filters.flatTypes.length > 0 ? 1 : 0) +
-                (filters.status !== 'ALL' ? 1 : 0) +
-                (filters.rentMin > 0 || filters.rentMax < 100000 ? 1 : 0)}
+              {activeFilterCount}
             </span>
           )}
         </button>
       </div>
 
-      {/* Mobile bottom sheet */}
+      {/* Mobile: bottom sheet — fixed so it overlays the full viewport */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           {/* Overlay */}
           <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
           {/* Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-white p-6 pb-10 shadow-2xl">
-            {/* Drag handle */}
+          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 pb-10 shadow-2xl">
             <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-gray-300" />
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold text-gray-900">Filters</h2>
