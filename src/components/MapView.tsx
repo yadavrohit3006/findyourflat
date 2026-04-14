@@ -139,6 +139,21 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
     });
   }, []);
 
+  // Token missing — env var not set in Vercel at build time
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-gray-100">
+        <div className="rounded-2xl bg-white p-6 shadow-map-card text-center max-w-sm">
+          <p className="text-sm font-semibold text-red-600 mb-1">Map unavailable</p>
+          <p className="text-xs text-gray-500">
+            <code className="bg-gray-100 px-1 rounded">NEXT_PUBLIC_MAPBOX_TOKEN</code> is not set.
+            Add it to Vercel environment variables and redeploy.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-full w-full">
       <Map
@@ -151,6 +166,7 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
         onClick={() => setSelectedListing(null)}
+        onError={(e) => console.error('[Mapbox error]', e.error)}
         reuseMaps
       >
         <NavigationControl position="bottom-right" />
