@@ -59,6 +59,9 @@ export function ListingPopup({ listing, onClose }: ListingPopupProps) {
             <Badge className={flatTypeColor(listing.flatType)}>
               {flatTypeLabel(listing.flatType)}
             </Badge>
+            <Badge className="bg-teal-100 text-teal-800">
+              {{ UNFURNISHED: 'Unfurnished', SEMI_FURNISHED: 'Semi-Furnished', FULLY_FURNISHED: 'Fully Furnished' }[listing.furnishingStatus]}
+            </Badge>
             <Badge className={statusColor(listing.status)}>
               {statusLabel(listing.status)}
             </Badge>

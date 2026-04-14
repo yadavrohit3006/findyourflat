@@ -32,6 +32,7 @@ export interface ListingRow {
   room_type: string;
   listing_type: string;
   flat_type: string;
+  furnishing_status: string;
   gender_preference: string;
   status: string;
   available_from: string | null;

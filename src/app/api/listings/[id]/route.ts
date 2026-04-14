@@ -19,6 +19,7 @@ function toListing(row: ListingRow): Listing {
     rentMonthly: row.rent_monthly,
     listingType: row.listing_type as Listing['listingType'],
     flatType: row.flat_type as Listing['flatType'],
+    furnishingStatus: row.furnishing_status as Listing['furnishingStatus'],
     genderPreference: row.gender_preference as Listing['genderPreference'],
     status: row.status as Listing['status'],
     availableFrom: row.available_from,

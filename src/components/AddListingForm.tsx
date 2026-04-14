@@ -26,6 +26,13 @@ const FLAT_TYPE_OPTIONS = [
   { value: '4BHK', label: '4 BHK' },
 ];
 
+const FURNISHING_OPTIONS = [
+  { value: '', label: 'Select…' },
+  { value: 'UNFURNISHED', label: 'Unfurnished' },
+  { value: 'SEMI_FURNISHED', label: 'Semi-Furnished' },
+  { value: 'FULLY_FURNISHED', label: 'Fully Furnished' },
+];
+
 const GENDER_OPTIONS = [
   { value: '', label: 'Select preference…' },
   { value: 'ANY', label: 'Any Gender' },
@@ -150,6 +157,14 @@ export function AddListingForm() {
               error={errors.flatType?.message}
             />
           </div>
+
+          <Select
+            label="Furnishing status"
+            required
+            options={FURNISHING_OPTIONS}
+            {...register('furnishingStatus')}
+            error={errors.furnishingStatus?.message}
+          />
 
           <Input
             label="Title"

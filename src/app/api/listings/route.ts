@@ -15,6 +15,7 @@ function toMapPoint(row: ListingRow): ListingMapPoint {
     rentMonthly: row.rent_monthly,
     listingType: row.listing_type as ListingMapPoint['listingType'],
     flatType: row.flat_type as ListingMapPoint['flatType'],
+    furnishingStatus: row.furnishing_status as ListingMapPoint['furnishingStatus'],
     status: row.status as ListingMapPoint['status'],
     title: row.title,
     neighborhood: row.neighborhood,
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
 
   let query = getSupabase()
     .from('listings')
-    .select('id, latitude, longitude, rent_monthly, listing_type, flat_type, status, title, neighborhood, city', {
+    .select('id, latitude, longitude, rent_monthly, listing_type, flat_type, furnishing_status, status, title, neighborhood, city', {
       count: 'exact',
     })
     .gte('latitude', south)
@@ -109,6 +110,7 @@ export async function POST(req: NextRequest) {
       rent_monthly: d.rentMonthly,
       listing_type: d.listingType,
       flat_type: d.flatType,
+      furnishing_status: d.furnishingStatus,
       gender_preference: d.genderPreference,
       available_from: d.availableFrom ?? null,
       contact_name: d.contactName ?? null,

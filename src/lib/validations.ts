@@ -20,6 +20,9 @@ export const createListingSchema = z
     flatType: z.enum(['1RK', '1BHK', '2BHK', '3BHK', '4BHK'], {
       required_error: 'Please select a flat type',
     }),
+    furnishingStatus: z.enum(['UNFURNISHED', 'SEMI_FURNISHED', 'FULLY_FURNISHED'], {
+      required_error: 'Please select a furnishing status',
+    }),
     genderPreference: z.enum(['ANY', 'MALE_ONLY', 'FEMALE_ONLY'], {
       required_error: 'Gender preference is required',
     }),

@@ -1,4 +1,5 @@
 export type ListingType = 'NEW_LISTING' | 'REPLACEMENT';
+export type FurnishingStatus = 'UNFURNISHED' | 'SEMI_FURNISHED' | 'FULLY_FURNISHED';
 export type FlatType = '1RK' | '1BHK' | '2BHK' | '3BHK' | '4BHK';
 export type GenderPreference = 'ANY' | 'MALE_ONLY' | 'FEMALE_ONLY';
 export type AvailabilityStatus = 'AVAILABLE' | 'RESERVED' | 'TAKEN';
@@ -18,6 +19,7 @@ export interface Listing {
   rentMonthly: number;
   listingType: ListingType;
   flatType: FlatType;
+  furnishingStatus: FurnishingStatus;
   genderPreference: GenderPreference;
   status: AvailabilityStatus;
   availableFrom: string | null;
@@ -36,6 +38,7 @@ export interface ListingMapPoint {
   rentMonthly: number;
   listingType: ListingType;
   flatType: FlatType;
+  furnishingStatus: FurnishingStatus;
   status: AvailabilityStatus;
   title: string;
   neighborhood: string | null;
@@ -72,6 +75,7 @@ export interface CreateListingInput {
   rentMonthly: number;
   listingType: ListingType;
   flatType: FlatType;
+  furnishingStatus: FurnishingStatus;
   genderPreference: GenderPreference;
   availableFrom?: string;
   contactName?: string;
