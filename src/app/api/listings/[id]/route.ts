@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import type { ListingRow } from '@/lib/supabase';
 import type { Listing } from '@/types';
 
@@ -35,7 +35,7 @@ export async function GET(
 ) {
   const { id } = params;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('listings')
     .select('*')
     .eq('id', id)

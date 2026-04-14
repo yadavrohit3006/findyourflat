@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import type { ListingRow } from '@/lib/supabase';
 import { createListingSchema } from '@/lib/validations';
 import type { ListingMapPoint } from '@/types';
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
   const genderParam = searchParams.get('genderPreference');
   const roomTypes = roomTypesParam ? roomTypesParam.split(',') : [];
 
-  let query = supabase
+  let query = getSupabase()
     .from('listings')
     .select('id, latitude, longitude, rent_monthly, room_type, status, title, neighborhood, city', {
       count: 'exact',
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
 
   const d = parsed.data;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('listings')
     .insert({
       latitude: d.latitude,

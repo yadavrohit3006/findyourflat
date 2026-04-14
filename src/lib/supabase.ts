@@ -1,9 +1,20 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-);
+// Lazy singleton — not initialized at module load so the build doesn't crash
+// when env vars are absent during Vercel's static analysis phase.
+let _client: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+  if (!_client) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) {
+      throw new Error('Missing env vars: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
+    }
+    _client = createClient(url, key);
+  }
+  return _client;
+}
 
 /** Row shape as stored in Supabase (snake_case) */
 export interface ListingRow {
