@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { cn, roomTypeLabel } from '@/lib/utils';
-import type { ListingFilters, RoomType } from '@/types';
+import { cn, listingTypeLabel, flatTypeLabel } from '@/lib/utils';
+import type { ListingFilters, ListingType, FlatType } from '@/types';
 import type { FiltersHook } from '@/hooks/useFilters';
 
-const ROOM_TYPES: RoomType[] = ['PRIVATE_ROOM', 'SHARED_ROOM', 'ENTIRE_FLAT', 'STUDIO'];
+const LISTING_TYPES: ListingType[] = ['NEW_LISTING', 'REPLACEMENT'];
+const FLAT_TYPES: FlatType[] = ['1RK', '1BHK', '2BHK', '3BHK'];
 
 const RENT_PRESETS = [
   { label: 'Any', min: 0, max: 100000 },
@@ -23,7 +24,7 @@ interface FiltersPanelProps {
 }
 
 export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProps) {
-  const { filters, updateFilters, resetFilters, toggleRoomType, isActive } = hook;
+  const { filters, updateFilters, resetFilters, toggleListingType, toggleFlatType, isActive } = hook;
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const activeRentPreset = RENT_PRESETS.find(
@@ -78,22 +79,43 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
         </div>
       </div>
 
-      {/* Room Type */}
+      {/* Listing Type */}
       <div>
-        <p className="text-xs font-medium text-gray-700 mb-2">Room type</p>
+        <p className="text-xs font-medium text-gray-700 mb-2">Listing type</p>
         <div className="flex flex-wrap gap-1.5">
-          {ROOM_TYPES.map((type) => (
+          {LISTING_TYPES.map((type) => (
             <button
               key={type}
-              onClick={() => toggleRoomType(type)}
+              onClick={() => toggleListingType(type)}
               className={cn(
                 'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-                filters.roomTypes.includes(type)
+                filters.listingTypes.includes(type)
                   ? 'border-sky-600 bg-sky-600 text-white'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-sky-300 hover:text-sky-700'
               )}
             >
-              {roomTypeLabel(type)}
+              {listingTypeLabel(type)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Flat Type */}
+      <div>
+        <p className="text-xs font-medium text-gray-700 mb-2">Flat type</p>
+        <div className="flex flex-wrap gap-1.5">
+          {FLAT_TYPES.map((type) => (
+            <button
+              key={type}
+              onClick={() => toggleFlatType(type)}
+              className={cn(
+                'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                filters.flatTypes.includes(type)
+                  ? 'border-sky-600 bg-sky-600 text-white'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-sky-300 hover:text-sky-700'
+              )}
+            >
+              {flatTypeLabel(type)}
             </button>
           ))}
         </div>
@@ -173,7 +195,8 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
           Filters
           {isActive && (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-sky-600">
-              {(filters.roomTypes.length > 0 ? 1 : 0) +
+              {(filters.listingTypes.length > 0 ? 1 : 0) +
+                (filters.flatTypes.length > 0 ? 1 : 0) +
                 (filters.status !== 'ALL' ? 1 : 0) +
                 (filters.rentMin > 0 || filters.rentMax < 100000 ? 1 : 0)}
             </span>

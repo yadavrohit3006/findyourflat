@@ -1,12 +1,13 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import type { ListingFilters, RoomType, AvailabilityStatus, GenderPreference } from '@/types';
+import type { ListingFilters, ListingType, FlatType, AvailabilityStatus, GenderPreference } from '@/types';
 
 export const DEFAULT_FILTERS: ListingFilters = {
   rentMin: 0,
   rentMax: 100000,
-  roomTypes: [],
+  listingTypes: [],
+  flatTypes: [],
   status: 'AVAILABLE',
   genderPreference: 'ALL',
 };
@@ -22,23 +23,33 @@ export function useFilters() {
     setFilters(DEFAULT_FILTERS);
   }, []);
 
-  const toggleRoomType = useCallback((type: RoomType) => {
+  const toggleListingType = useCallback((type: ListingType) => {
     setFilters((prev) => ({
       ...prev,
-      roomTypes: prev.roomTypes.includes(type)
-        ? prev.roomTypes.filter((t) => t !== type)
-        : [...prev.roomTypes, type],
+      listingTypes: prev.listingTypes.includes(type)
+        ? prev.listingTypes.filter((t) => t !== type)
+        : [...prev.listingTypes, type],
+    }));
+  }, []);
+
+  const toggleFlatType = useCallback((type: FlatType) => {
+    setFilters((prev) => ({
+      ...prev,
+      flatTypes: prev.flatTypes.includes(type)
+        ? prev.flatTypes.filter((t) => t !== type)
+        : [...prev.flatTypes, type],
     }));
   }, []);
 
   const isActive =
     filters.rentMin !== DEFAULT_FILTERS.rentMin ||
     filters.rentMax !== DEFAULT_FILTERS.rentMax ||
-    filters.roomTypes.length > 0 ||
+    filters.listingTypes.length > 0 ||
+    filters.flatTypes.length > 0 ||
     filters.status !== DEFAULT_FILTERS.status ||
     filters.genderPreference !== DEFAULT_FILTERS.genderPreference;
 
-  return { filters, updateFilters, resetFilters, toggleRoomType, isActive };
+  return { filters, updateFilters, resetFilters, toggleListingType, toggleFlatType, isActive };
 }
 
 export type FiltersHook = ReturnType<typeof useFilters>;

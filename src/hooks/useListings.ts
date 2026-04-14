@@ -54,8 +54,11 @@ function buildKey(bounds: MapBounds | null, filters: ListingFilters): string | n
     rentMax: String(filters.rentMax),
   });
 
-  if (filters.roomTypes.length > 0) {
-    params.set('roomTypes', filters.roomTypes.join(','));
+  if (filters.listingTypes.length > 0) {
+    params.set('listingTypes', filters.listingTypes.join(','));
+  }
+  if (filters.flatTypes.length > 0) {
+    params.set('flatTypes', filters.flatTypes.join(','));
   }
   if (filters.status !== 'ALL') {
     params.set('status', filters.status);

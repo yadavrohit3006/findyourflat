@@ -1,4 +1,5 @@
-export type RoomType = 'PRIVATE_ROOM' | 'SHARED_ROOM' | 'ENTIRE_FLAT' | 'STUDIO';
+export type ListingType = 'NEW_LISTING' | 'REPLACEMENT';
+export type FlatType = '1RK' | '1BHK' | '2BHK' | '3BHK';
 export type GenderPreference = 'ANY' | 'MALE_ONLY' | 'FEMALE_ONLY' | 'NON_BINARY_FRIENDLY';
 export type AvailabilityStatus = 'AVAILABLE' | 'RESERVED' | 'TAKEN';
 
@@ -15,7 +16,8 @@ export interface Listing {
   title: string;
   description: string | null;
   rentMonthly: number;
-  roomType: RoomType;
+  listingType: ListingType;
+  flatType: FlatType;
   genderPreference: GenderPreference;
   status: AvailabilityStatus;
   availableFrom: string | null;
@@ -32,7 +34,8 @@ export interface ListingMapPoint {
   latitude: number;
   longitude: number;
   rentMonthly: number;
-  roomType: RoomType;
+  listingType: ListingType;
+  flatType: FlatType;
   status: AvailabilityStatus;
   title: string;
   neighborhood: string | null;
@@ -43,7 +46,8 @@ export interface ListingMapPoint {
 export interface ListingFilters {
   rentMin: number;
   rentMax: number;
-  roomTypes: RoomType[];
+  listingTypes: ListingType[];
+  flatTypes: FlatType[];
   status: AvailabilityStatus | 'ALL';
   genderPreference: GenderPreference | 'ALL';
 }
@@ -66,7 +70,8 @@ export interface CreateListingInput {
   title: string;
   description?: string;
   rentMonthly: number;
-  roomType: RoomType;
+  listingType: ListingType;
+  flatType: FlatType;
   genderPreference: GenderPreference;
   availableFrom?: string;
   contactName?: string;

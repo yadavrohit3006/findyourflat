@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/Button';
 import { useListing } from '@/hooks/useListings';
 import {
   formatRentFull,
-  roomTypeLabel,
+  listingTypeLabel,
+  listingTypeColor,
+  flatTypeLabel,
+  flatTypeColor,
   statusLabel,
   statusColor,
-  roomTypeColor,
   formatDate,
 } from '@/lib/utils';
 import type { ListingMapPoint } from '@/types';
@@ -51,8 +53,11 @@ export function ListingPopup({ listing, onClose }: ListingPopupProps) {
         <div className="p-4">
           {/* Badges */}
           <div className="mb-2 flex flex-wrap gap-1.5">
-            <Badge className={roomTypeColor(listing.roomType)}>
-              {roomTypeLabel(listing.roomType)}
+            <Badge className={listingTypeColor(listing.listingType)}>
+              {listingTypeLabel(listing.listingType)}
+            </Badge>
+            <Badge className={flatTypeColor(listing.flatType)}>
+              {flatTypeLabel(listing.flatType)}
             </Badge>
             <Badge className={statusColor(listing.status)}>
               {statusLabel(listing.status)}

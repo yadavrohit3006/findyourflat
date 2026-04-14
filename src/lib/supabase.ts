@@ -30,6 +30,8 @@ export interface ListingRow {
   description: string | null;
   rent_monthly: number;
   room_type: string;
+  listing_type: string;
+  flat_type: string;
   gender_preference: string;
   status: string;
   available_from: string | null;

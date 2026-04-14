@@ -14,7 +14,12 @@ export const createListingSchema = z
       .int('Rent must be a whole number')
       .min(500, 'Minimum rent is ₹500')
       .max(500000, 'Maximum rent is ₹5,00,000'),
-    roomType: z.enum(['PRIVATE_ROOM', 'SHARED_ROOM', 'ENTIRE_FLAT', 'STUDIO']),
+    listingType: z.enum(['NEW_LISTING', 'REPLACEMENT'], {
+      required_error: 'Please select a listing type',
+    }),
+    flatType: z.enum(['1RK', '1BHK', '2BHK', '3BHK'], {
+      required_error: 'Please select a flat type',
+    }),
     genderPreference: z.enum(['ANY', 'MALE_ONLY', 'FEMALE_ONLY', 'NON_BINARY_FRIENDLY'], {
       required_error: 'Gender preference is required',
     }),

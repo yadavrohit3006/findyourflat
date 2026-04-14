@@ -11,11 +11,18 @@ import { Button } from '@/components/ui/Button';
 import { FormLocationPicker } from '@/components/FormLocationPicker';
 import { createListingSchema, type CreateListingSchema } from '@/lib/validations';
 
-const ROOM_TYPE_OPTIONS = [
-  { value: 'PRIVATE_ROOM', label: 'Private Room' },
-  { value: 'SHARED_ROOM', label: 'Shared Room' },
-  { value: 'ENTIRE_FLAT', label: 'Entire Flat' },
-  { value: 'STUDIO', label: 'Studio' },
+const LISTING_TYPE_OPTIONS = [
+  { value: '', label: 'Select…' },
+  { value: 'NEW_LISTING', label: 'New Listing — full flat available' },
+  { value: 'REPLACEMENT', label: 'Replacement — someone moving out' },
+];
+
+const FLAT_TYPE_OPTIONS = [
+  { value: '', label: 'Select…' },
+  { value: '1RK', label: '1 RK' },
+  { value: '1BHK', label: '1 BHK' },
+  { value: '2BHK', label: '2 BHK' },
+  { value: '3BHK', label: '3 BHK' },
 ];
 
 const GENDER_OPTIONS = [
@@ -38,16 +45,12 @@ export function AddListingForm() {
     formState: { errors, isSubmitting },
   } = useForm<CreateListingSchema>({
     resolver: zodResolver(createListingSchema),
-    defaultValues: {
-      roomType: 'PRIVATE_ROOM',
-    },
   });
 
   function handleLocationPick(loc: { lat: number; lng: number; address: string; city: string }) {
     setLocationError(null);
     setValue('latitude', loc.lat, { shouldValidate: true });
     setValue('longitude', loc.lng, { shouldValidate: true });
-    // Pre-fill address and city if still empty
     setValue('address', loc.address, { shouldValidate: false });
     if (loc.city) setValue('city', loc.city, { shouldValidate: false });
   }
@@ -55,7 +58,6 @@ export function AddListingForm() {
   async function onSubmit(data: CreateListingSchema) {
     setSubmitError(null);
 
-    // Guard: lat/lng must have been set via the picker
     if (!data.latitude || !data.longitude) {
       setLocationError('Please search and select a location above.');
       return;
@@ -130,10 +132,28 @@ export function AddListingForm() {
         </h2>
 
         <div className="space-y-4">
+          {/* Listing type + Flat type */}
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="Listing type"
+              required
+              options={LISTING_TYPE_OPTIONS}
+              {...register('listingType')}
+              error={errors.listingType?.message}
+            />
+            <Select
+              label="Flat type"
+              required
+              options={FLAT_TYPE_OPTIONS}
+              {...register('flatType')}
+              error={errors.flatType?.message}
+            />
+          </div>
+
           <Input
             label="Title"
             required
-            placeholder="1BHK in HSR Layout — Fully Furnished"
+            placeholder="2BHK in HSR Layout — Fully Furnished"
             {...register('title')}
             error={errors.title?.message}
           />
@@ -165,22 +185,13 @@ export function AddListingForm() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Select
-              label="Room type"
-              required
-              options={ROOM_TYPE_OPTIONS}
-              {...register('roomType')}
-              error={errors.roomType?.message}
-            />
-            <Select
-              label="Gender preference"
-              required
-              options={GENDER_OPTIONS}
-              {...register('genderPreference')}
-              error={errors.genderPreference?.message}
-            />
-          </div>
+          <Select
+            label="Gender preference"
+            required
+            options={GENDER_OPTIONS}
+            {...register('genderPreference')}
+            error={errors.genderPreference?.message}
+          />
         </div>
       </section>
 

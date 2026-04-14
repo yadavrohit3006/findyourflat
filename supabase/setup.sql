@@ -13,6 +13,8 @@ create table if not exists listings (
   description       text,
   rent_monthly      int4 not null,
   room_type         text not null default 'PRIVATE_ROOM',
+  listing_type      text not null default 'NEW_LISTING',
+  flat_type         text not null default '1BHK',
   gender_preference text not null default 'ANY',
   status            text not null default 'AVAILABLE',
   available_from    timestamptz,

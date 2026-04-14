@@ -13,7 +13,8 @@ function toMapPoint(row: ListingRow): ListingMapPoint {
     latitude: row.latitude,
     longitude: row.longitude,
     rentMonthly: row.rent_monthly,
-    roomType: row.room_type as ListingMapPoint['roomType'],
+    listingType: row.listing_type as ListingMapPoint['listingType'],
+    flatType: row.flat_type as ListingMapPoint['flatType'],
     status: row.status as ListingMapPoint['status'],
     title: row.title,
     neighborhood: row.neighborhood,
@@ -37,14 +38,16 @@ export async function GET(req: NextRequest) {
   const [west, south, east, north] = parts;
   const rentMin = Number(searchParams.get('rentMin') ?? 0);
   const rentMax = Number(searchParams.get('rentMax') ?? 500000);
-  const roomTypesParam = searchParams.get('roomTypes');
+  const listingTypesParam = searchParams.get('listingTypes');
+  const flatTypesParam = searchParams.get('flatTypes');
   const statusParam = searchParams.get('status');
   const genderParam = searchParams.get('genderPreference');
-  const roomTypes = roomTypesParam ? roomTypesParam.split(',') : [];
+  const listingTypes = listingTypesParam ? listingTypesParam.split(',') : [];
+  const flatTypes = flatTypesParam ? flatTypesParam.split(',') : [];
 
   let query = getSupabase()
     .from('listings')
-    .select('id, latitude, longitude, rent_monthly, room_type, status, title, neighborhood, city', {
+    .select('id, latitude, longitude, rent_monthly, listing_type, flat_type, status, title, neighborhood, city', {
       count: 'exact',
     })
     .gte('latitude', south)
@@ -56,7 +59,8 @@ export async function GET(req: NextRequest) {
     .limit(MAX_RESULTS)
     .order('created_at', { ascending: false });
 
-  if (roomTypes.length > 0) query = query.in('room_type', roomTypes);
+  if (listingTypes.length > 0) query = query.in('listing_type', listingTypes);
+  if (flatTypes.length > 0) query = query.in('flat_type', flatTypes);
   if (statusParam) query = query.eq('status', statusParam);
   if (genderParam) query = query.eq('gender_preference', genderParam);
 
@@ -103,7 +107,8 @@ export async function POST(req: NextRequest) {
       title: d.title,
       description: d.description ?? null,
       rent_monthly: d.rentMonthly,
-      room_type: d.roomType,
+      listing_type: d.listingType,
+      flat_type: d.flatType,
       gender_preference: d.genderPreference,
       available_from: d.availableFrom ?? null,
       contact_name: d.contactName ?? null,

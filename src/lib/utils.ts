@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { RoomType, AvailabilityStatus, GenderPreference } from '@/types';
+import type { ListingType, FlatType, AvailabilityStatus, GenderPreference } from '@/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -24,14 +24,22 @@ export function formatRentFull(amount: number): string {
   }).format(amount) + '/mo';
 }
 
-export function roomTypeLabel(type: RoomType): string {
-  const labels: Record<RoomType, string> = {
-    PRIVATE_ROOM: 'Private Room',
-    SHARED_ROOM: 'Shared Room',
-    ENTIRE_FLAT: 'Entire Flat',
-    STUDIO: 'Studio',
-  };
-  return labels[type];
+export function listingTypeLabel(type: ListingType): string {
+  return type === 'NEW_LISTING' ? 'New Listing' : 'Replacement';
+}
+
+export function flatTypeLabel(type: FlatType): string {
+  return type;
+}
+
+export function listingTypeColor(type: ListingType): string {
+  return type === 'NEW_LISTING'
+    ? 'bg-indigo-100 text-indigo-800'
+    : 'bg-amber-100 text-amber-800';
+}
+
+export function flatTypeColor(_type: FlatType): string {
+  return 'bg-sky-100 text-sky-800';
 }
 
 export function statusLabel(status: AvailabilityStatus): string {
@@ -60,16 +68,6 @@ export function statusColor(status: AvailabilityStatus): string {
     TAKEN: 'bg-red-100 text-red-800',
   };
   return colors[status];
-}
-
-export function roomTypeColor(type: RoomType): string {
-  const colors: Record<RoomType, string> = {
-    PRIVATE_ROOM: 'bg-blue-100 text-blue-800',
-    SHARED_ROOM: 'bg-purple-100 text-purple-800',
-    ENTIRE_FLAT: 'bg-indigo-100 text-indigo-800',
-    STUDIO: 'bg-teal-100 text-teal-800',
-  };
-  return colors[type];
 }
 
 export function formatDate(date: string | null | undefined): string {
