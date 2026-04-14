@@ -31,9 +31,9 @@ function toListing(row: ListingRow): Listing {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
 
   const { data, error } = await getSupabase()
     .from('listings')
