@@ -1,6 +1,6 @@
 export type ListingType = 'NEW_LISTING' | 'REPLACEMENT';
-export type FlatType = '1RK' | '1BHK' | '2BHK' | '3BHK';
-export type GenderPreference = 'ANY' | 'MALE_ONLY' | 'FEMALE_ONLY' | 'NON_BINARY_FRIENDLY';
+export type FlatType = '1RK' | '1BHK' | '2BHK' | '3BHK' | '4BHK';
+export type GenderPreference = 'ANY' | 'MALE_ONLY' | 'FEMALE_ONLY';
 export type AvailabilityStatus = 'AVAILABLE' | 'RESERVED' | 'TAKEN';
 
 /** Full listing shape — returned from GET /api/listings/:id */

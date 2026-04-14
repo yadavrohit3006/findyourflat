@@ -23,6 +23,7 @@ const FLAT_TYPE_OPTIONS = [
   { value: '1BHK', label: '1 BHK' },
   { value: '2BHK', label: '2 BHK' },
   { value: '3BHK', label: '3 BHK' },
+  { value: '4BHK', label: '4 BHK' },
 ];
 
 const GENDER_OPTIONS = [
@@ -30,7 +31,6 @@ const GENDER_OPTIONS = [
   { value: 'ANY', label: 'Any Gender' },
   { value: 'MALE_ONLY', label: 'Male Only' },
   { value: 'FEMALE_ONLY', label: 'Female Only' },
-  { value: 'NON_BINARY_FRIENDLY', label: 'Non-Binary Friendly' },
 ];
 
 export function AddListingForm() {
@@ -172,7 +172,7 @@ export function AddListingForm() {
               type="number"
               required
               placeholder="15000"
-              min={500}
+              min={1000}
               {...register('rentMonthly', { valueAsNumber: true })}
               error={errors.rentMonthly?.message}
             />

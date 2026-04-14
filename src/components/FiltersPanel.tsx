@@ -7,7 +7,7 @@ import type { ListingFilters, ListingType, FlatType } from '@/types';
 import type { FiltersHook } from '@/hooks/useFilters';
 
 const LISTING_TYPES: ListingType[] = ['NEW_LISTING', 'REPLACEMENT'];
-const FLAT_TYPES: FlatType[] = ['1RK', '1BHK', '2BHK', '3BHK'];
+const FLAT_TYPES: FlatType[] = ['1RK', '1BHK', '2BHK', '3BHK', '4BHK'];
 
 const RENT_PRESETS = [
   { label: 'Any', min: 0, max: 100000 },

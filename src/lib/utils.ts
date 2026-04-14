@@ -56,7 +56,6 @@ export function genderLabel(pref: GenderPreference): string {
     ANY: 'Any Gender',
     MALE_ONLY: 'Male Only',
     FEMALE_ONLY: 'Female Only',
-    NON_BINARY_FRIENDLY: 'Non-Binary Friendly',
   };
   return labels[pref];
 }
