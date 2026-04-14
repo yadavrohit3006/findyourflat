@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
       contact_name: d.contactName ?? null,
       contact_email: d.contactEmail || null,
       contact_phone: d.contactPhone ?? null,
-      source_url: d.googleMapsUrl,
+      source_url: null,
     })
     .select()
     .single();

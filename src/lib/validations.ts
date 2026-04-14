@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 export const createListingSchema = z
   .object({
-    googleMapsUrl: z.string().min(1, 'Google Maps URL is required'),
     latitude: z.number().min(-90, 'Invalid latitude').max(90, 'Invalid latitude'),
     longitude: z.number().min(-180, 'Invalid longitude').max(180, 'Invalid longitude'),
     address: z.string().min(3, 'Address is required').max(200),
@@ -20,7 +19,7 @@ export const createListingSchema = z
       required_error: 'Gender preference is required',
     }),
     availableFrom: z.string().min(1, 'Available from date is required'),
-    contactName: z.string().min(1, 'Your name is required').max(100),
+    contactName: z.string().max(100).optional(),
     contactEmail: z.string().email('Invalid email').optional().or(z.literal('')),
     contactPhone: z.string().max(20).optional(),
   })

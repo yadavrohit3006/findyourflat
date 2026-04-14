@@ -58,7 +58,6 @@ export interface MapBounds {
 
 /** Input for creating a listing (form → API) */
 export interface CreateListingInput {
-  googleMapsUrl: string;
   latitude: number;
   longitude: number;
   address: string;

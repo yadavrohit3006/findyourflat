@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
-import { parseGoogleMapsUrl } from '@/lib/parseGoogleMapsUrl';
+import { FormLocationPicker } from '@/components/FormLocationPicker';
 import { createListingSchema, type CreateListingSchema } from '@/lib/validations';
 
 const ROOM_TYPE_OPTIONS = [
@@ -28,8 +28,7 @@ const GENDER_OPTIONS = [
 
 export function AddListingForm() {
   const router = useRouter();
-  const [coordsPreview, setCoordsPreview] = useState<{ lat: number; lng: number } | null>(null);
-  const [coordsError, setCoordsError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -44,26 +43,23 @@ export function AddListingForm() {
     },
   });
 
-  function handleMapsUrlBlur(e: React.FocusEvent<HTMLInputElement>) {
-    const url = e.target.value.trim();
-    if (!url) return;
-
-    const coords = parseGoogleMapsUrl(url);
-    if (coords) {
-      setCoordsPreview(coords);
-      setCoordsError(null);
-      setValue('latitude', coords.lat, { shouldValidate: true });
-      setValue('longitude', coords.lng, { shouldValidate: true });
-    } else {
-      setCoordsPreview(null);
-      setCoordsError(
-        'Could not extract coordinates. Make sure you paste a pin URL (e.g. maps.google.com/?q=28.45,77.02) not a search URL.'
-      );
-    }
+  function handleLocationPick(loc: { lat: number; lng: number; address: string; city: string }) {
+    setLocationError(null);
+    setValue('latitude', loc.lat, { shouldValidate: true });
+    setValue('longitude', loc.lng, { shouldValidate: true });
+    // Pre-fill address and city if still empty
+    setValue('address', loc.address, { shouldValidate: false });
+    if (loc.city) setValue('city', loc.city, { shouldValidate: false });
   }
 
   async function onSubmit(data: CreateListingSchema) {
     setSubmitError(null);
+
+    // Guard: lat/lng must have been set via the picker
+    if (!data.latitude || !data.longitude) {
+      setLocationError('Please search and select a location above.');
+      return;
+    }
 
     try {
       const res = await fetch('/api/listings', {
@@ -95,26 +91,10 @@ export function AddListingForm() {
         </h2>
 
         <div className="space-y-4">
-          {/* Google Maps URL */}
-          <div>
-            <Input
-              label="Google Maps pin URL"
-              required
-              placeholder="https://maps.google.com/?q=28.4595,77.0266"
-              hint="Drop a pin on Google Maps → Share → Copy link. Must contain coordinates."
-              {...register('googleMapsUrl')}
-              onBlur={handleMapsUrlBlur}
-              error={errors.googleMapsUrl?.message ?? (coordsError ?? undefined)}
-            />
-            {coordsPreview && (
-              <div className="mt-2 flex items-center gap-2 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-700">
-                <svg className="h-4 w-4 flex-shrink-0 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Coordinates extracted: {coordsPreview.lat.toFixed(5)}, {coordsPreview.lng.toFixed(5)}
-              </div>
-            )}
-          </div>
+          <FormLocationPicker
+            onPick={handleLocationPick}
+            error={locationError ?? (errors.latitude?.message || errors.longitude?.message)}
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <Input
@@ -213,9 +193,8 @@ export function AddListingForm() {
 
         <div className="space-y-4">
           <Input
-            label="Your name"
+            label="Your name (optional)"
             placeholder="Priya S."
-            required
             {...register('contactName')}
             error={errors.contactName?.message}
           />
