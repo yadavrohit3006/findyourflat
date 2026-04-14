@@ -1,0 +1,41 @@
+/* Mapbox CSS must come before Tailwind to allow Tailwind overrides */
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+    @apply antialiased;
+  }
+
+  #__next {
+    height: 100%;
+  }
+}
+
+/* Remove default Mapbox popup arrow so our custom tail renders cleanly */
+.listing-popup .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 1rem;
+  box-shadow: none;
+  background: transparent;
+}
+
+.listing-popup .mapboxgl-popup-tip {
+  display: none;
+}
+
+.listing-popup .mapboxgl-popup-close-button {
+  display: none;
+}
+
+/* Smooth map control transitions */
+.mapboxgl-ctrl-group {
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}

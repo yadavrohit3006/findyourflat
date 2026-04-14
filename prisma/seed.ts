@@ -1,0 +1,238 @@
+import { PrismaClient, RoomType, GenderPreference, AvailabilityStatus } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+const sampleListings = [
+  // Bangalore
+  {
+    latitude: 12.9352,
+    longitude: 77.6245,
+    address: '14th Cross, HSR Layout Sector 4',
+    city: 'Bangalore',
+    neighborhood: 'HSR Layout',
+    title: '1BHK in HSR Layout — Fully Furnished',
+    description: 'Bright, well-ventilated 1BHK on the 3rd floor. Comes with a fully equipped kitchen, high-speed WiFi, and a dedicated parking spot. 10 mins walk to HSR BDA complex.',
+    rentMonthly: 22000,
+    roomType: RoomType.ENTIRE_FLAT,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-02-01'),
+    contactName: 'Priya S.',
+    contactEmail: 'priya@example.com',
+    sourceUrl: 'https://maps.google.com/?q=12.9352,77.6245',
+  },
+  {
+    latitude: 12.9698,
+    longitude: 77.7499,
+    address: 'Whitefield Main Road, near ITPL',
+    city: 'Bangalore',
+    neighborhood: 'Whitefield',
+    title: 'Private Room in 3BHK Flat — ITPL',
+    description: 'Private room in a shared 3BHK. Two working professionals already living here. Attached bathroom, AC included. Society has a gym and swimming pool.',
+    rentMonthly: 14000,
+    roomType: RoomType.PRIVATE_ROOM,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-01-15'),
+    contactName: 'Rahul M.',
+    contactPhone: '+91 9876543210',
+    sourceUrl: 'https://maps.google.com/?q=12.9698,77.7499',
+  },
+  {
+    latitude: 12.9121,
+    longitude: 77.6446,
+    address: 'BTM Layout 2nd Stage',
+    city: 'Bangalore',
+    neighborhood: 'BTM Layout',
+    title: 'Studio Apartment — BTM Layout',
+    description: 'Compact studio perfect for solo professionals. Modular kitchen, daily housekeeping available. Close to Silk Board junction.',
+    rentMonthly: 16500,
+    roomType: RoomType.STUDIO,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-02-10'),
+    contactName: 'Ananya R.',
+    contactEmail: 'ananya@example.com',
+    sourceUrl: 'https://maps.google.com/?q=12.9121,77.6446',
+  },
+  {
+    latitude: 13.0067,
+    longitude: 77.5802,
+    address: 'Indiranagar 100 Feet Road',
+    city: 'Bangalore',
+    neighborhood: 'Indiranagar',
+    title: '2BHK — Indiranagar, looking for flatmate',
+    description: 'One private room available in my 2BHK. Spacious flat with a balcony. Very safe locality, lots of cafes and restaurants nearby. Preferably female flatmate.',
+    rentMonthly: 18000,
+    roomType: RoomType.PRIVATE_ROOM,
+    genderPreference: GenderPreference.FEMALE_ONLY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-01-20'),
+    contactName: 'Meera K.',
+    contactEmail: 'meera@example.com',
+    sourceUrl: 'https://maps.google.com/?q=13.0067,77.5802',
+  },
+  // Delhi NCR
+  {
+    latitude: 28.4595,
+    longitude: 77.0266,
+    address: 'Sector 49, Gurugram',
+    city: 'Gurugram',
+    neighborhood: 'Sector 49',
+    title: 'Private Room — DLF Phase 3 area',
+    description: 'Well-maintained room in a 3BHK society apartment. 24/7 security, power backup, covered parking. Close to Huda City Centre metro.',
+    rentMonthly: 15000,
+    roomType: RoomType.PRIVATE_ROOM,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-02-01'),
+    contactName: 'Vikram T.',
+    contactPhone: '+91 9988776655',
+    sourceUrl: 'https://maps.google.com/?q=28.4595,77.0266',
+  },
+  {
+    latitude: 28.6139,
+    longitude: 77.2090,
+    address: 'Lajpat Nagar IV',
+    city: 'Delhi',
+    neighborhood: 'Lajpat Nagar',
+    title: '2BHK Entire Flat — Lajpat Nagar',
+    description: 'Entire 2BHK available immediately. Freshly painted, semi-furnished. Ground floor with a small garden. Metro connectivity is excellent.',
+    rentMonthly: 28000,
+    roomType: RoomType.ENTIRE_FLAT,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-01-25'),
+    contactName: 'Suresh P.',
+    contactEmail: 'suresh@example.com',
+    sourceUrl: 'https://maps.google.com/?q=28.6139,77.2090',
+  },
+  // Mumbai
+  {
+    latitude: 19.0760,
+    longitude: 72.8777,
+    address: 'Bandra West, Turner Road',
+    city: 'Mumbai',
+    neighborhood: 'Bandra West',
+    title: 'Shared Room in Bandra — Sea Facing',
+    description: 'Bed in a shared room (2 people per room) in a 3BHK sea-facing apartment. Fully furnished, meals available, great community of working professionals.',
+    rentMonthly: 19000,
+    roomType: RoomType.SHARED_ROOM,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-02-05'),
+    contactName: 'Neha J.',
+    contactEmail: 'neha@example.com',
+    sourceUrl: 'https://maps.google.com/?q=19.0760,72.8777',
+  },
+  {
+    latitude: 19.0178,
+    longitude: 72.8478,
+    address: 'Kurla West, near LBS Marg',
+    city: 'Mumbai',
+    neighborhood: 'Kurla',
+    title: '1RK Studio — Kurla West',
+    description: 'Compact 1RK ideal for a single person. Clean, well-maintained building. 5 mins from Kurla station (Central & Harbour lines).',
+    rentMonthly: 12000,
+    roomType: RoomType.STUDIO,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-01-18'),
+    contactName: 'Rajan D.',
+    contactPhone: '+91 9123456789',
+    sourceUrl: 'https://maps.google.com/?q=19.0178,72.8478',
+  },
+  // Pune
+  {
+    latitude: 18.5204,
+    longitude: 73.8567,
+    address: 'Koregaon Park Lane 6',
+    city: 'Pune',
+    neighborhood: 'Koregaon Park',
+    title: 'Private Room — Koregaon Park',
+    description: 'Beautiful room in a bungalow-style flat. Tree-lined street, very peaceful. Suits someone working from home. Fibre internet included.',
+    rentMonthly: 13500,
+    roomType: RoomType.PRIVATE_ROOM,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-02-01'),
+    contactName: 'Aditya C.',
+    contactEmail: 'aditya@example.com',
+    sourceUrl: 'https://maps.google.com/?q=18.5204,73.8567',
+  },
+  {
+    latitude: 18.5679,
+    longitude: 73.9143,
+    address: 'Viman Nagar, near Phoenix Mall',
+    city: 'Pune',
+    neighborhood: 'Viman Nagar',
+    title: '2BHK — Viman Nagar, 1 Room Available',
+    description: 'One room available in a 2BHK apartment. Both flatmates are IT professionals. Gated society with gym access. Very close to airport.',
+    rentMonthly: 12000,
+    roomType: RoomType.PRIVATE_ROOM,
+    genderPreference: GenderPreference.MALE_ONLY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-01-28'),
+    contactName: 'Siddharth L.',
+    contactPhone: '+91 9765432109',
+    sourceUrl: 'https://maps.google.com/?q=18.5679,73.9143',
+  },
+  {
+    latitude: 12.9784,
+    longitude: 77.6408,
+    address: 'Koramangala 5th Block',
+    city: 'Bangalore',
+    neighborhood: 'Koramangala',
+    title: 'Premium 3BHK — Koramangala 5th Block',
+    description: 'High-end 3BHK in the heart of Koramangala. Designer interiors, modular kitchen, 2 covered parking. Society with rooftop pool. Immediate possession.',
+    rentMonthly: 55000,
+    roomType: RoomType.ENTIRE_FLAT,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.AVAILABLE,
+    availableFrom: new Date('2025-02-01'),
+    contactName: 'Deepak N.',
+    contactEmail: 'deepak@example.com',
+    sourceUrl: 'https://maps.google.com/?q=12.9784,77.6408',
+  },
+  {
+    latitude: 13.0012,
+    longitude: 77.5553,
+    address: 'Sadashivanagar, Palace Road',
+    city: 'Bangalore',
+    neighborhood: 'Sadashivanagar',
+    title: 'Shared Room — Sadashivanagar',
+    description: 'Bed in a clean shared room. Ideal for students/interns. All utilities included. Very friendly flatmates.',
+    rentMonthly: 7500,
+    roomType: RoomType.SHARED_ROOM,
+    genderPreference: GenderPreference.ANY,
+    status: AvailabilityStatus.RESERVED,
+    availableFrom: new Date('2025-03-01'),
+    contactName: 'Kavita S.',
+    contactEmail: 'kavita@example.com',
+    sourceUrl: 'https://maps.google.com/?q=13.0012,77.5553',
+  },
+];
+
+async function main() {
+  console.log('🌱 Seeding database...');
+
+  // Clear existing data
+  await prisma.listing.deleteMany();
+
+  // Create sample listings
+  for (const listing of sampleListings) {
+    await prisma.listing.create({ data: listing });
+  }
+
+  console.log(`✅ Seeded ${sampleListings.length} listings.`);
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

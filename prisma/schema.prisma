@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoomType {
+  PRIVATE_ROOM
+  SHARED_ROOM
+  ENTIRE_FLAT
+  STUDIO
+}
+
+enum GenderPreference {
+  ANY
+  MALE_ONLY
+  FEMALE_ONLY
+  NON_BINARY_FRIENDLY
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  RESERVED
+  TAKEN
+}
+
+model Listing {
+  id               String             @id @default(cuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  // Location
+  latitude         Float
+  longitude        Float
+  address          String
+  city             String
+  neighborhood     String?
+
+  // Listing details
+  title            String
+  description      String?            @db.Text
+  rentMonthly      Int
+  roomType         RoomType
+  genderPreference GenderPreference   @default(ANY)
+  status           AvailabilityStatus @default(AVAILABLE)
+  availableFrom    DateTime?
+
+  // Contact
+  contactName      String?
+  contactEmail     String?
+  contactPhone     String?
+
+  // Audit
+  sourceUrl        String?
+
+  @@index([latitude, longitude])
+  @@index([status])
+  @@index([rentMonthly])
+  @@index([city])
+}
