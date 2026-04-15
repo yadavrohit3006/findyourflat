@@ -227,40 +227,64 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         )}
       </Map>
 
-      {/* Custom location button — replaces GeolocateControl so we can handle denied state */}
-      <div className="absolute bottom-24 right-2.5 z-10">
-        <button
-          onClick={requestLocation}
-          title="Use my location"
-          className="flex h-[29px] w-[29px] items-center justify-center rounded-sm bg-white shadow-md hover:bg-gray-50 transition-colors"
-        >
-          {locationStatus === 'requesting' ? (
-            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
-          ) : locationStatus === 'granted' ? (
-            // Filled location icon when active
-            <svg className="h-4 w-4 text-sky-600" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-            </svg>
-          ) : locationStatus === 'denied' || locationStatus === 'blocked' ? (
-            // Crossed-out icon when blocked
-            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
-            </svg>
-          ) : (
-            // Default location crosshair icon
-            <svg className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-            </svg>
+      {/* Custom location button — positioned above NavigationControl (~99px tall at bottom-right) */}
+      <div className="absolute bottom-32 right-2.5 z-10">
+        <div className="relative">
+          <button
+            onClick={requestLocation}
+            title="Use my location"
+            className="flex h-[29px] w-[29px] items-center justify-center rounded-sm bg-white shadow-md hover:bg-gray-50 transition-colors"
+          >
+            {locationStatus === 'requesting' ? (
+              <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
+            ) : locationStatus === 'granted' ? (
+              <svg className="h-4 w-4 text-sky-600" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+            ) : locationStatus === 'denied' || locationStatus === 'blocked' ? (
+              <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+              </svg>
+            ) : (
+              <svg className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+            )}
+          </button>
+
+          {/* "Blocked" popover — appears to the LEFT of the button, not at top-center */}
+          {locationStatus === 'blocked' && (
+            <div className="absolute bottom-0 right-full mr-2 w-56 rounded-xl bg-white shadow-lg border border-gray-100 p-3 z-20">
+              <div className="flex items-start gap-2">
+                <svg className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-gray-800">Location blocked</p>
+                  <p className="text-xs text-gray-500 mt-0.5 leading-snug">
+                    Go to browser settings → Site permissions → Location → Allow.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setLocationStatus('denied')}
+                  className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           )}
-        </button>
+        </div>
       </div>
 
-      {/* Location status toasts */}
+      {/* Location status toasts — shown below search bar to avoid overlapping it */}
       {locationStatus === 'requesting' && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 md:top-16">
           <div className="flex items-center gap-2.5 rounded-full bg-white px-4 py-2.5 shadow-map-card text-sm text-gray-600 border border-gray-100">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
             Finding your location…
@@ -269,37 +293,13 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
       )}
 
       {locationStatus === 'granted' && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 md:top-16">
           <div className="flex items-center gap-2.5 rounded-full bg-green-600 px-4 py-2.5 shadow-map-card text-sm text-white">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
             </svg>
             Showing listings near you
-          </div>
-        </div>
-      )}
-
-      {locationStatus === 'blocked' && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-[90vw] max-w-sm">
-          <div className="flex items-start gap-2.5 rounded-2xl bg-white px-4 py-3 shadow-map-card text-sm text-gray-700 border border-gray-100">
-            <svg className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-            <div>
-              <p className="font-medium text-gray-800">Location access blocked</p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                To enable, open your browser settings → Site permissions → Location → Allow for this site.
-              </p>
-            </div>
-            <button
-              onClick={() => setLocationStatus('denied')}
-              className="flex-shrink-0 text-gray-400 hover:text-gray-600 ml-auto"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
         </div>
       )}
