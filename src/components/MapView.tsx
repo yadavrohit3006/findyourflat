@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Map, { type MapRef, NavigationControl, GeolocateControl } from 'react-map-gl';
+import Map, { type MapRef, NavigationControl } from 'react-map-gl';
 import useSupercluster from 'use-supercluster';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -18,7 +18,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 // Fallback: center of India
 const DEFAULT_VIEW = { longitude: 78.9629, latitude: 20.5937, zoom: 5 };
 
-type LocationStatus = 'idle' | 'requesting' | 'granted' | 'denied' | 'searching';
+type LocationStatus = 'idle' | 'requesting' | 'granted' | 'denied' | 'blocked';
 
 interface ViewState {
   longitude: number;
@@ -40,6 +40,8 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
 
   // Store resolved coords so we can fly once the map is ready
   const pendingCoordsRef = useRef<{ lng: number; lat: number } | null>(null);
+  // Track whether the user has already seen a denial (first deny → 'denied', subsequent → 'blocked')
+  const everDeniedRef = useRef(false);
 
   const { listings, total, isLoading } = useListings(bounds, filters);
 
@@ -50,8 +52,8 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
     onListingsChange?.(total);
   }
 
-  // Ask for location immediately on mount so the browser prompt fires ASAP
-  useEffect(() => {
+  // Reusable function — called on mount AND when user clicks the location button
+  const requestLocation = useCallback(() => {
     if (!navigator.geolocation) return;
 
     setLocationStatus('requesting');
@@ -60,20 +62,36 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
       (pos) => {
         const coords = { lng: pos.coords.longitude, lat: pos.coords.latitude };
         if (mapRef.current) {
-          // Map already loaded — fly right away
           mapRef.current.flyTo({ center: [coords.lng, coords.lat], zoom: 13, duration: 1200 });
         } else {
-          // Map not ready yet — store and fly in onLoad
           pendingCoordsRef.current = coords;
         }
+        everDeniedRef.current = false;
         setLocationStatus('granted');
         setTimeout(() => setLocationStatus('idle'), 3000);
       },
-      () => {
-        setLocationStatus('denied');
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          if (everDeniedRef.current) {
+            // User already denied once and clicked retry — explain how to unblock
+            setLocationStatus('blocked');
+          } else {
+            // First denial — show search bar auto-focused
+            everDeniedRef.current = true;
+            setLocationStatus('denied');
+          }
+        } else {
+          setLocationStatus('denied');
+        }
       },
       { timeout: 10000, maximumAge: 60000 }
     );
+  }, []);
+
+  // Ask for location on mount
+  useEffect(() => {
+    requestLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateBounds = useCallback(() => {
@@ -91,7 +109,6 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
 
   const handleMapLoad = useCallback(() => {
     updateBounds();
-    // If geolocation resolved before the map was ready, fly now
     if (pendingCoordsRef.current) {
       const { lng, lat } = pendingCoordsRef.current;
       pendingCoordsRef.current = null;
@@ -139,7 +156,6 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
     });
   }, []);
 
-  // Token missing — env var not set in Vercel at build time
   if (!MAPBOX_TOKEN) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-100">
@@ -170,17 +186,6 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         reuseMaps
       >
         <NavigationControl position="bottom-right" />
-        <GeolocateControl
-          position="bottom-right"
-          trackUserLocation={false}
-          onGeolocate={(e) => {
-            mapRef.current?.flyTo({
-              center: [e.coords.longitude, e.coords.latitude],
-              zoom: 13,
-              duration: 1000,
-            });
-          }}
-        />
 
         {clusters.map((cluster) => {
           const [lng, lat] = cluster.geometry.coordinates;
@@ -222,6 +227,37 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         )}
       </Map>
 
+      {/* Custom location button — replaces GeolocateControl so we can handle denied state */}
+      <div className="absolute bottom-24 right-2.5 z-10">
+        <button
+          onClick={requestLocation}
+          title="Use my location"
+          className="flex h-[29px] w-[29px] items-center justify-center rounded-sm bg-white shadow-md hover:bg-gray-50 transition-colors"
+        >
+          {locationStatus === 'requesting' ? (
+            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
+          ) : locationStatus === 'granted' ? (
+            // Filled location icon when active
+            <svg className="h-4 w-4 text-sky-600" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+          ) : locationStatus === 'denied' || locationStatus === 'blocked' ? (
+            // Crossed-out icon when blocked
+            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+            </svg>
+          ) : (
+            // Default location crosshair icon
+            <svg className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+            </svg>
+          )}
+        </button>
+      </div>
+
       {/* Location status toasts */}
       {locationStatus === 'requesting' && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
@@ -244,7 +280,31 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         </div>
       )}
 
-      {/* Persistent location search — always visible, auto-focuses on location denial */}
+      {locationStatus === 'blocked' && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-[90vw] max-w-sm">
+          <div className="flex items-start gap-2.5 rounded-2xl bg-white px-4 py-3 shadow-map-card text-sm text-gray-700 border border-gray-100">
+            <svg className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <div>
+              <p className="font-medium text-gray-800">Location access blocked</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                To enable, open your browser settings → Site permissions → Location → Allow for this site.
+              </p>
+            </div>
+            <button
+              onClick={() => setLocationStatus('denied')}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600 ml-auto"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Location search */}
       <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 w-[90vw] max-w-sm md:top-4 pointer-events-auto">
         <LocationSearch
           autoFocus={locationStatus === 'denied'}
