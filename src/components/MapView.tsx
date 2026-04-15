@@ -185,7 +185,7 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         onError={(e) => console.error('[Mapbox error]', e.error)}
         reuseMaps
       >
-        <NavigationControl position="bottom-right" />
+        <NavigationControl position="bottom-right" showCompass={false} />
 
         {clusters.map((cluster) => {
           const [lng, lat] = cluster.geometry.coordinates;
@@ -227,8 +227,8 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         )}
       </Map>
 
-      {/* Custom location button — positioned above NavigationControl (~99px tall at bottom-right) */}
-      <div className="absolute bottom-32 right-2.5 z-10">
+      {/* Custom location button — positioned above NavigationControl (compass hidden, ~62px tall) */}
+      <div className="absolute bottom-24 right-2.5 z-10">
         <div className="relative">
           <button
             onClick={requestLocation}
@@ -327,7 +327,7 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
 
       {/* Zoom hint when capped at 500 results */}
       {total >= 500 && !isLoading && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20">
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20">
           <div className="rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5 text-xs text-amber-800 shadow-sm">
             Zoom in to see all listings in this area
           </div>

@@ -219,8 +219,8 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
         {filterContent}
       </div>
 
-      {/* Mobile: fixed FAB — fixed so iOS 100vh/overflow-hidden doesn't clip it */}
-      <div className="fixed bottom-20 right-4 z-30 md:hidden">
+      {/* Mobile: fixed FAB — bottom-LEFT so it doesn't clash with map controls on bottom-right */}
+      <div className="fixed bottom-6 left-4 z-30 md:hidden">
         <button
           onClick={() => setMobileOpen(true)}
           className={cn(
