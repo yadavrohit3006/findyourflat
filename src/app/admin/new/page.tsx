@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { AdminListingForm, type ExtractedListing } from '@/components/admin/AdminListingForm';
 
 type Step = 'input' | 'extracting' | 'review';
 
 export default function AdminNewPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>('input');
   const [extracted, setExtracted] = useState<ExtractedListing | null>(null);
   const [error, setError] = useState('');
