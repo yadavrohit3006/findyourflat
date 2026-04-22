@@ -22,6 +22,7 @@ interface PickedLocation {
 interface FormLocationPickerProps {
   onPick: (loc: PickedLocation) => void;
   error?: string;
+  initialQuery?: string;
 }
 
 function extractCity(feature: GeoFeature): string {
@@ -31,8 +32,8 @@ function extractCity(feature: GeoFeature): string {
   return place?.text ?? locality?.text ?? feature.text ?? '';
 }
 
-export function FormLocationPicker({ onPick, error }: FormLocationPickerProps) {
-  const [query, setQuery] = useState('');
+export function FormLocationPicker({ onPick, error, initialQuery }: FormLocationPickerProps) {
+  const [query, setQuery] = useState(initialQuery ?? '');
   const [suggestions, setSuggestions] = useState<GeoFeature[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);

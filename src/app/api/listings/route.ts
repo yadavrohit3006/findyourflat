@@ -53,6 +53,7 @@ export async function GET(req: NextRequest) {
     .select('id, latitude, longitude, rent_monthly, listing_type, flat_type, furnishing_status, status, title, neighborhood, city', {
       count: 'exact',
     })
+    .eq('is_approved', true)
     .gte('latitude', south)
     .lte('latitude', north)
     .gte('longitude', west)
@@ -120,6 +121,7 @@ export async function POST(req: NextRequest) {
       contact_email: d.contactEmail || null,
       contact_phone: d.contactPhone ?? null,
       source_url: null,
+      is_approved: false,
     })
     .select()
     .single();
