@@ -26,13 +26,23 @@ function ListingCard({
   onDeactivate: (id: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const [toggleError, setToggleError] = useState('');
 
   async function toggle() {
     setBusy(true);
+    setToggleError('');
+    const wasApproved = listing.is_approved;
     try {
-      const endpoint = listing.is_approved ? 'reject' : 'approve';
-      await fetch(`/api/admin/listings/${listing.id}/${endpoint}`, { method: 'POST' });
-      listing.is_approved ? onDeactivate(listing.id) : onActivate(listing.id);
+      const endpoint = wasApproved ? 'reject' : 'approve';
+      const res = await fetch(`/api/admin/listings/${listing.id}/${endpoint}`, { method: 'POST' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setToggleError(data.error ?? 'Failed to update. Try again.');
+        return;
+      }
+      wasApproved ? onDeactivate(listing.id) : onActivate(listing.id);
+    } catch {
+      setToggleError('Network error. Try again.');
     } finally {
       setBusy(false);
     }
@@ -72,7 +82,7 @@ function ListingCard({
           )}
         </div>
 
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex flex-col items-end gap-1">
           <button
             onClick={toggle}
             disabled={busy}
@@ -84,6 +94,7 @@ function ListingCard({
           >
             {busy ? '…' : listing.is_approved ? 'Set Inactive' : 'Set Active'}
           </button>
+          {toggleError && <p className="text-xs text-red-500 max-w-[120px] text-right">{toggleError}</p>}
         </div>
       </div>
     </div>
