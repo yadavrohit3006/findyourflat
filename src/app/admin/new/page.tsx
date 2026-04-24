@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AdminListingForm, type ExtractedListing } from '@/components/admin/AdminListingForm';
 
 type Step = 'input' | 'extracting' | 'review';
+type InputMode = 'image' | 'url' | 'text';
 
 export default function AdminNewPage() {
   const router = useRouter();
@@ -12,8 +13,9 @@ export default function AdminNewPage() {
   const [extracted, setExtracted] = useState<ExtractedListing | null>(null);
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
-  const [inputMode, setInputMode] = useState<'image' | 'url'>('image');
+  const [inputMode, setInputMode] = useState<InputMode>('image');
   const [url, setUrl] = useState('');
+  const [text, setText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const extract = useCallback(async (body: object) => {
@@ -70,18 +72,20 @@ export default function AdminNewPage() {
     if (file) handleFile(file);
   }
 
-  async function handleUrlExtract() {
-    if (!url.trim()) return;
-    extract({ url: url.trim() });
-  }
-
   function reset() {
     setStep('input');
     setExtracted(null);
     setError('');
     setUrl('');
+    setText('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
+
+  const TABS: { mode: InputMode; label: string }[] = [
+    { mode: 'image', label: 'Screenshot' },
+    { mode: 'text', label: 'Paste Text' },
+    { mode: 'url', label: 'URL' },
+  ];
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -102,31 +106,25 @@ export default function AdminNewPage() {
 
       {step === 'input' && (
         <div className="space-y-5">
-          {/* Mode toggle */}
+          {/* Mode tabs */}
           <div className="flex rounded-xl border border-gray-200 bg-white p-1 gap-1">
-            <button
-              onClick={() => setInputMode('image')}
-              className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
-                inputMode === 'image'
-                  ? 'bg-sky-600 text-white'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Upload Screenshot
-            </button>
-            <button
-              onClick={() => setInputMode('url')}
-              className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
-                inputMode === 'url'
-                  ? 'bg-sky-600 text-white'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Paste URL
-            </button>
+            {TABS.map(({ mode, label }) => (
+              <button
+                key={mode}
+                onClick={() => { setInputMode(mode); setError(''); }}
+                className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+                  inputMode === mode
+                    ? 'bg-sky-600 text-white'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          {inputMode === 'image' ? (
+          {/* Screenshot upload */}
+          {inputMode === 'image' && (
             <div
               onDrop={handleDrop}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -160,7 +158,33 @@ export default function AdminNewPage() {
                 onChange={handleFileChange}
               />
             </div>
-          ) : (
+          )}
+
+          {/* Paste text */}
+          {inputMode === 'text' && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Listing Text</label>
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Paste the listing text here — WhatsApp message, Facebook post, any text describing the flat..."
+                  rows={8}
+                  className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-300 resize-none"
+                />
+              </div>
+              <button
+                onClick={() => extract({ text: text.trim() })}
+                disabled={!text.trim()}
+                className="w-full rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:pointer-events-none text-white font-medium py-2.5 text-sm transition-colors"
+              >
+                Extract Details
+              </button>
+            </div>
+          )}
+
+          {/* Paste URL */}
+          {inputMode === 'url' && (
             <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Listing URL</label>
@@ -170,14 +194,14 @@ export default function AdminNewPage() {
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://facebook.com/groups/..."
                   className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-300"
-                  onKeyDown={(e) => e.key === 'Enter' && handleUrlExtract()}
+                  onKeyDown={(e) => e.key === 'Enter' && url.trim() && extract({ url: url.trim() })}
                 />
                 <p className="mt-1.5 text-xs text-gray-400">
                   Note: Facebook Marketplace listings require login and won&apos;t work — use a screenshot for those.
                 </p>
               </div>
               <button
-                onClick={handleUrlExtract}
+                onClick={() => extract({ url: url.trim() })}
                 disabled={!url.trim()}
                 className="w-full rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:pointer-events-none text-white font-medium py-2.5 text-sm transition-colors"
               >
@@ -207,7 +231,7 @@ export default function AdminNewPage() {
       {step === 'extracting' && (
         <div className="bg-white rounded-2xl border border-gray-200 p-16 text-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="h-10 w-10 animate-spin rounded-full border-3 border-sky-500 border-t-transparent" style={{ borderWidth: 3 }} />
+            <div className="h-10 w-10 animate-spin rounded-full border-sky-500 border-t-transparent" style={{ borderWidth: 3, borderStyle: 'solid' }} />
             <div>
               <p className="font-medium text-gray-800 text-sm">Extracting listing details…</p>
               <p className="text-xs text-gray-400 mt-1">Claude is reading the listing. Takes ~5 seconds.</p>
@@ -226,7 +250,7 @@ export default function AdminNewPage() {
             onClick={reset}
             className="mt-4 text-sm text-gray-400 hover:text-gray-600"
           >
-            ← Start over with a different screenshot
+            ← Start over
           </button>
         </div>
       )}

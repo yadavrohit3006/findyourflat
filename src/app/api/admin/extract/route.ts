@@ -53,7 +53,7 @@ function extractTextFromHTML(html: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { imageBase64?: string; imageMediaType?: string; url?: string };
+  let body: { imageBase64?: string; imageMediaType?: string; url?: string; text?: string };
   try {
     body = await req.json();
   } catch {
@@ -84,6 +84,16 @@ export async function POST(req: NextRequest) {
         },
       },
       { type: 'text', text: EXTRACT_PROMPT },
+    ];
+  } else if (body.text) {
+    if (body.text.trim().length < 10) {
+      return NextResponse.json({ error: 'Text is too short to extract details from.' }, { status: 400 });
+    }
+    messageContent = [
+      {
+        type: 'text',
+        text: `Here is the listing text:\n\n${body.text.trim()}\n\n${EXTRACT_PROMPT}`,
+      },
     ];
   } else if (body.url) {
     let pageText: string;
@@ -118,7 +128,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else {
-    return NextResponse.json({ error: 'Provide either imageBase64 or url' }, { status: 400 });
+    return NextResponse.json({ error: 'Provide imageBase64, text, or url' }, { status: 400 });
   }
 
   try {
