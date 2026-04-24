@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 
-export async function DELETE(
+export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -9,11 +9,11 @@ export async function DELETE(
 
   const { error } = await getSupabase()
     .from('listings')
-    .delete()
+    .update({ is_approved: false })
     .eq('id', id);
 
   if (error) {
-    console.error('[reject]', error);
+    console.error('[deactivate]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
