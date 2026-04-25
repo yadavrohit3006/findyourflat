@@ -117,11 +117,23 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
   }, [updateBounds]);
 
   // GeoJSON points for supercluster
-  const points: ListingGeoJSONFeature[] = listings.map((l) => ({
-    type: 'Feature',
-    properties: { ...l, cluster: false },
-    geometry: { type: 'Point', coordinates: [l.longitude, l.latitude] },
-  }));
+  // Offset listings that share exact coordinates so both pins are visible
+  const coordCount: Record<string, number> = {};
+  const points: ListingGeoJSONFeature[] = listings.map((l) => {
+    const key = `${l.longitude.toFixed(5)},${l.latitude.toFixed(5)}`;
+    const count = coordCount[key] ?? 0;
+    coordCount[key] = count + 1;
+    // Each duplicate gets a small spiral offset (~5m per step)
+    const offsetDeg = count * 0.00005;
+    const angle = count * 2.4; // golden angle spread
+    const lng = l.longitude + offsetDeg * Math.cos(angle);
+    const lat = l.latitude + offsetDeg * Math.sin(angle);
+    return {
+      type: 'Feature',
+      properties: { ...l, cluster: false },
+      geometry: { type: 'Point', coordinates: [lng, lat] },
+    };
+  });
 
   const mapBoundsArray = mapRef.current
     ? (mapRef.current.getMap().getBounds()?.toArray().flat() as
@@ -133,7 +145,7 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
     points,
     bounds: mapBoundsArray,
     zoom: viewState.zoom,
-    options: { radius: 75, maxZoom: 16 },
+    options: { radius: 40, maxZoom: 20 },
   });
 
   const handleClusterClick = useCallback(
