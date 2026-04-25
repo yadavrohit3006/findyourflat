@@ -39,6 +39,14 @@ export function FormLocationPicker({ onPick, error, initialQuery, defaultPicked 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<PickedLocation | null>(defaultPicked ?? null);
+
+  // Update when defaultPicked arrives asynchronously (e.g. auto-geocode in admin form)
+  useEffect(() => {
+    if (!defaultPicked) return;
+    setPicked(defaultPicked);
+    setQuery(defaultPicked.address);
+    setOpen(false);
+  }, [defaultPicked]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
