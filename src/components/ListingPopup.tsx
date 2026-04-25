@@ -24,7 +24,7 @@ interface ListingPopupProps {
 
 export function ListingPopup({ listing, onClose }: ListingPopupProps) {
   const [showContact, setShowContact] = useState(false);
-  const { listing: fullListing, isLoading } = useListing(showContact ? listing.id : null);
+  const { listing: fullListing, isLoading } = useListing(listing.id);
 
   return (
     <Popup
@@ -81,11 +81,16 @@ export function ListingPopup({ listing, onClose }: ListingPopupProps) {
             {listing.neighborhood ? `${listing.neighborhood}, ` : ''}{listing.city}
           </p>
 
-          {/* Rent */}
-          <div className="mb-3 flex items-baseline gap-1">
+          {/* Rent + Available from */}
+          <div className="mb-3 flex items-baseline justify-between gap-2">
             <span className="text-xl font-bold text-sky-600">
               {formatRentFull(listing.rentMonthly)}
             </span>
+            {fullListing?.availableFrom && (
+              <span className="text-xs text-gray-500 whitespace-nowrap">
+                From {formatDate(fullListing.availableFrom)}
+              </span>
+            )}
           </div>
 
           {/* Contact reveal */}
@@ -106,12 +111,6 @@ export function ListingPopup({ listing, onClose }: ListingPopupProps) {
             </div>
           ) : fullListing ? (
             <div className="rounded-xl bg-gray-50 p-3 space-y-1.5">
-              {fullListing.availableFrom && (
-                <p className="text-xs text-gray-600">
-                  <span className="font-medium">Available from:</span>{' '}
-                  {formatDate(fullListing.availableFrom)}
-                </p>
-              )}
               {fullListing.contactName && (
                 <p className="text-xs text-gray-700 font-medium">{fullListing.contactName}</p>
               )}
