@@ -19,6 +19,7 @@ const POPULAR_CITIES = [
   { label: 'Bangalore', lng: 77.5946, lat: 12.9716 },
   { label: 'Mumbai',    lng: 72.8777, lat: 19.0760 },
   { label: 'Delhi',     lng: 77.2090, lat: 28.6139 },
+  { label: 'Gurugram',  lng: 77.0266, lat: 28.4595 },
   { label: 'Pune',      lng: 73.8567, lat: 18.5204 },
   { label: 'Hyderabad', lng: 78.4867, lat: 17.3850 },
   { label: 'Chennai',   lng: 80.2707, lat: 13.0827 },
