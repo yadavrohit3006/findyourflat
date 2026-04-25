@@ -47,13 +47,20 @@ export function ListingMarker({ listing, onClick, isSelected }: ListingMarkerPro
         {/* Pill body */}
         <div
           className={cn(
-            'flex items-center rounded-full px-3 py-1.5 text-xs font-bold whitespace-nowrap',
+            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold whitespace-nowrap',
             isSelected ? 'ring-2 ring-white ring-offset-1 ring-offset-sky-600' : '',
             textCls,
             !isSelected && isAvailable && 'border border-gray-200',
           )}
           style={{ backgroundColor: pillBg }}
         >
+          {/* Home icon */}
+          <svg
+            className="flex-shrink-0"
+            width="11" height="11" viewBox="0 0 20 20" fill="currentColor"
+          >
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7A1 1 0 003 11h1v6a1 1 0 001 1h4v-4h2v4h4a1 1 0 001-1v-6h1a1 1 0 00.707-1.707l-7-7z" />
+          </svg>
           {formatRent(listing.rentMonthly)}
         </div>
 
