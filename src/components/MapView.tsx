@@ -178,7 +178,7 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
         onMove={(e) => setViewState(e.viewState)}
         onMoveEnd={updateBounds}
         onLoad={handleMapLoad}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
         onClick={() => setSelectedListing(null)}
