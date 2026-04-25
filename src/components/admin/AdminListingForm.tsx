@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -61,10 +61,13 @@ interface AdminListingFormProps {
   defaultData?: ExtractedListing;
 }
 
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+
 export function AdminListingForm({ defaultData }: AdminListingFormProps) {
   const router = useRouter();
   const [locationError, setLocationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [autoPickedLocation, setAutoPickedLocation] = useState<{ lat: number; lng: number; address: string; city: string } | null>(null);
 
   const {
     register,
@@ -91,6 +94,40 @@ export function AdminListingForm({ defaultData }: AdminListingFormProps) {
       neighborhood: defaultData?.neighborhood ?? '',
     },
   });
+
+  // Auto-geocode extracted address on mount
+  useEffect(() => {
+    const query = [defaultData?.neighborhood, defaultData?.city].filter(Boolean).join(', ')
+      || defaultData?.address;
+    if (!query) return;
+
+    fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json` +
+      `?access_token=${MAPBOX_TOKEN}&types=address,poi,place,locality,neighborhood,district&country=in&limit=1`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        const feature = data.features?.[0];
+        if (!feature) return;
+        const ctx = feature.context ?? [];
+        const place = ctx.find((c: { id: string }) => c.id.startsWith('place.'));
+        const locality = ctx.find((c: { id: string }) => c.id.startsWith('locality.'));
+        const city = place?.text ?? locality?.text ?? feature.text ?? '';
+        const loc = {
+          lat: feature.center[1],
+          lng: feature.center[0],
+          address: feature.place_name,
+          city,
+        };
+        setAutoPickedLocation(loc);
+        setValue('latitude', loc.lat, { shouldValidate: true });
+        setValue('longitude', loc.lng, { shouldValidate: true });
+        setValue('address', loc.address, { shouldValidate: false });
+        if (loc.city) setValue('city', loc.city, { shouldValidate: false });
+      })
+      .catch(() => {/* silently ignore — user can pick manually */});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleLocationPick(loc: { lat: number; lng: number; address: string; city: string }) {
     setLocationError(null);
@@ -149,7 +186,7 @@ export function AdminListingForm({ defaultData }: AdminListingFormProps) {
         <div className="space-y-4">
           <FormLocationPicker
             onPick={handleLocationPick}
-            initialQuery={defaultData?.neighborhood ? `${defaultData.neighborhood}, ${defaultData.city}` : defaultData?.city ?? ''}
+            defaultPicked={autoPickedLocation ?? undefined}
             error={locationError ?? (errors.latitude?.message || errors.longitude?.message)}
           />
 
