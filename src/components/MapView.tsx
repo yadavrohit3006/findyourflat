@@ -123,8 +123,8 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
     const key = `${l.longitude.toFixed(5)},${l.latitude.toFixed(5)}`;
     const count = coordCount[key] ?? 0;
     coordCount[key] = count + 1;
-    // Each duplicate gets a small spiral offset (~5m per step)
-    const offsetDeg = count * 0.00005;
+    // Each duplicate gets a spiral offset (~30m per step) so pins are visually separated
+    const offsetDeg = count * 0.0003;
     const angle = count * 2.4; // golden angle spread
     const lng = l.longitude + offsetDeg * Math.cos(angle);
     const lat = l.latitude + offsetDeg * Math.sin(angle);
@@ -145,7 +145,7 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
     points,
     bounds: mapBoundsArray,
     zoom: viewState.zoom,
-    options: { radius: 40, maxZoom: 20 },
+    options: { radius: 50, maxZoom: 13 },
   });
 
   const handleClusterClick = useCallback(
