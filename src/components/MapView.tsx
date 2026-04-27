@@ -114,6 +114,23 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
   }, [updateBounds]);
 
 
+  // Offset listings that share the same coordinates so both pins are visible
+  const coordCount: Record<string, number> = {};
+  const displayListings = listings.map((l) => {
+    const key = `${l.longitude.toFixed(4)},${l.latitude.toFixed(4)}`;
+    const count = coordCount[key] ?? 0;
+    coordCount[key] = count + 1;
+    if (count === 0) return l;
+    // Spiral offset ~25m per duplicate
+    const offsetDeg = count * 0.00025;
+    const angle = count * 2.4;
+    return {
+      ...l,
+      longitude: l.longitude + offsetDeg * Math.cos(angle),
+      latitude: l.latitude + offsetDeg * Math.sin(angle),
+    };
+  });
+
   const handleMarkerClick = useCallback((listing: ListingMapPoint) => {
     setSelectedListing(listing);
     mapRef.current?.flyTo({
@@ -154,7 +171,7 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
       >
         <NavigationControl position="bottom-right" showCompass={false} />
 
-        {listings.map((listing) => (
+        {displayListings.map((listing) => (
           <ListingMarker
             key={listing.id}
             listing={listing}
