@@ -2,16 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Map, { type MapRef, NavigationControl } from 'react-map-gl';
-import useSupercluster from 'use-supercluster';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { ListingMarker } from './ListingMarker';
-import { ClusterMarker } from './ClusterMarker';
 import { ListingPopup } from './ListingPopup';
 import { LocationSearch } from './LocationSearch';
 import { useListings } from '@/hooks/useListings';
 import type { ListingFilters, ListingMapPoint, MapBounds } from '@/types';
-import type { ListingGeoJSONFeature } from '@/types';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
@@ -116,48 +113,6 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
     }
   }, [updateBounds]);
 
-  // GeoJSON points for supercluster
-  // Offset listings that share exact coordinates so both pins are visible
-  const coordCount: Record<string, number> = {};
-  const points: ListingGeoJSONFeature[] = listings.map((l) => {
-    const key = `${l.longitude.toFixed(5)},${l.latitude.toFixed(5)}`;
-    const count = coordCount[key] ?? 0;
-    coordCount[key] = count + 1;
-    // Each duplicate gets a spiral offset (~30m per step) so pins are visually separated
-    const offsetDeg = count * 0.0003;
-    const angle = count * 2.4; // golden angle spread
-    const lng = l.longitude + offsetDeg * Math.cos(angle);
-    const lat = l.latitude + offsetDeg * Math.sin(angle);
-    return {
-      type: 'Feature',
-      properties: { ...l, cluster: false },
-      geometry: { type: 'Point', coordinates: [lng, lat] },
-    };
-  });
-
-  const mapBoundsArray = mapRef.current
-    ? (mapRef.current.getMap().getBounds()?.toArray().flat() as
-        | [number, number, number, number]
-        | undefined)
-    : undefined;
-
-  const { clusters, supercluster } = useSupercluster({
-    points,
-    bounds: mapBoundsArray,
-    zoom: viewState.zoom,
-    options: { radius: 50, maxZoom: 13 },
-  });
-
-  const handleClusterClick = useCallback(
-    (clusterId: number, longitude: number, latitude: number) => {
-      const expansionZoom = Math.min(
-        supercluster?.getClusterExpansionZoom(clusterId) ?? 20,
-        20
-      );
-      mapRef.current?.flyTo({ center: [longitude, latitude], zoom: expansionZoom, duration: 600 });
-    },
-    [supercluster]
-  );
 
   const handleMarkerClick = useCallback((listing: ListingMapPoint) => {
     setSelectedListing(listing);
@@ -199,37 +154,14 @@ export default function MapView({ filters, onListingsChange }: MapViewProps) {
       >
         <NavigationControl position="bottom-right" showCompass={false} />
 
-        {clusters.map((cluster) => {
-          const [lng, lat] = cluster.geometry.coordinates;
-          const { cluster: isCluster, cluster_id, point_count } = cluster.properties as {
-            cluster: boolean;
-            cluster_id: number;
-            point_count: number;
-          };
-
-          if (isCluster) {
-            return (
-              <ClusterMarker
-                key={`cluster-${cluster_id}`}
-                longitude={lng}
-                latitude={lat}
-                pointCount={point_count}
-                clusterId={cluster_id}
-                onClusterClick={handleClusterClick}
-              />
-            );
-          }
-
-          const props = cluster.properties as ListingMapPoint & { cluster: false };
-          return (
-            <ListingMarker
-              key={props.id}
-              listing={props}
-              onClick={handleMarkerClick}
-              isSelected={selectedListing?.id === props.id}
-            />
-          );
-        })}
+        {listings.map((listing) => (
+          <ListingMarker
+            key={listing.id}
+            listing={listing}
+            onClick={handleMarkerClick}
+            isSelected={selectedListing?.id === listing.id}
+          />
+        ))}
 
         {selectedListing && (
           <ListingPopup
