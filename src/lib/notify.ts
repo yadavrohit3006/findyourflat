@@ -1,5 +1,5 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const ADMIN_EMAIL = 'rohit.yadav@bachatt.app';
+const ADMIN_EMAIL = 'rohit30062k@gmail.com';
 const FROM_EMAIL = process.env.NOTIFY_FROM_EMAIL ?? 'onboarding@resend.dev';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://findyourflat.vercel.app';
 
