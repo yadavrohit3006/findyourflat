@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import type { ListingRow } from '@/lib/supabase';
 import { createListingSchema } from '@/lib/validations';
+import { notifyNewListing } from '@/lib/notify';
 import type { ListingMapPoint } from '@/types';
 
 const MAX_RESULTS = 500;
@@ -130,6 +131,20 @@ export async function POST(req: NextRequest) {
     console.error('[POST /api/listings]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  // Fire-and-forget — don't let a notification failure block the response
+  notifyNewListing({
+    id: data.id,
+    title: d.title,
+    city: d.city,
+    neighborhood: d.neighborhood ?? null,
+    rentMonthly: d.rentMonthly,
+    flatType: d.flatType,
+    listingType: d.listingType,
+    contactName: d.contactName ?? null,
+    contactPhone: d.contactPhone ?? null,
+    contactEmail: d.contactEmail ?? null,
+  }).catch(() => {/* already logged inside */});
 
   return NextResponse.json(data, { status: 201 });
 }
