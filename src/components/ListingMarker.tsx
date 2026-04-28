@@ -9,9 +9,10 @@ interface ListingMarkerProps {
   listing: ListingMapPoint;
   onClick: (listing: ListingMapPoint) => void;
   isSelected: boolean;
+  pixelOffset?: [number, number];
 }
 
-export function ListingMarker({ listing, onClick, isSelected }: ListingMarkerProps) {
+export function ListingMarker({ listing, onClick, isSelected, pixelOffset }: ListingMarkerProps) {
   const isAvailable = listing.status === 'AVAILABLE';
   const isReserved  = listing.status === 'RESERVED';
 
@@ -24,6 +25,7 @@ export function ListingMarker({ listing, onClick, isSelected }: ListingMarkerPro
       longitude={listing.longitude}
       latitude={listing.latitude}
       anchor="bottom"
+      offset={pixelOffset ?? [0, 0]}
       onClick={(e) => {
         e.originalEvent.stopPropagation();
         onClick(listing);
