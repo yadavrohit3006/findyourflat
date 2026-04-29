@@ -7,6 +7,7 @@ import { Suspense, useState } from 'react';
 import { MapSkeleton } from '@/components/MapSkeleton';
 import { FiltersPanel } from '@/components/FiltersPanel';
 import { useFilters } from '@/hooks/useFilters';
+import type { ListingFilters } from '@/types';
 
 // Load MapView only in the browser — Mapbox needs window/WebGL
 const MapView = dynamic(() => import('@/components/MapView'), {
@@ -35,14 +36,38 @@ function SuccessBanner() {
   );
 }
 
+interface MapWithCityFocusProps {
+  filters: ListingFilters;
+  onListingsChange: (count: number) => void;
+}
+
+// Reads city params from URL — must be inside Suspense because of useSearchParams
+function MapWithCityFocus({ filters, onListingsChange }: MapWithCityFocusProps) {
+  const searchParams = useSearchParams();
+
+  const initialView = (() => {
+    const lat = parseFloat(searchParams.get('lat') ?? '');
+    const lng = parseFloat(searchParams.get('lng') ?? '');
+    const zoom = parseFloat(searchParams.get('zoom') ?? '');
+    if (!isNaN(lat) && !isNaN(lng)) return { lat, lng, zoom: isNaN(zoom) ? 12 : zoom };
+    return null;
+  })();
+
+  return (
+    <MapView filters={filters} onListingsChange={onListingsChange} initialView={initialView} />
+  );
+}
+
 export default function HomePage() {
   const filtersHook = useFilters();
   const [listingCount, setListingCount] = useState(0);
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Full-screen map */}
-      <MapView filters={filtersHook.filters} onListingsChange={setListingCount} />
+      {/* Full-screen map — wrapped in Suspense for useSearchParams */}
+      <Suspense fallback={<MapSkeleton />}>
+        <MapWithCityFocus filters={filtersHook.filters} onListingsChange={setListingCount} />
+      </Suspense>
 
       {/* Floating navbar */}
       <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-3 px-4 pt-4 md:px-6 pointer-events-none">

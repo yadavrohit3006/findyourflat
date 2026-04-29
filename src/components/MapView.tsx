@@ -26,11 +26,16 @@ interface ViewState {
 interface MapViewProps {
   filters: ListingFilters;
   onListingsChange?: (count: number) => void;
+  initialView?: { lat: number; lng: number; zoom: number } | null;
 }
 
-export default function MapView({ filters, onListingsChange }: MapViewProps) {
+export default function MapView({ filters, onListingsChange, initialView }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
-  const [viewState, setViewState] = useState<ViewState>(DEFAULT_VIEW);
+  const [viewState, setViewState] = useState<ViewState>(
+    initialView
+      ? { latitude: initialView.lat, longitude: initialView.lng, zoom: initialView.zoom }
+      : DEFAULT_VIEW
+  );
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const [selectedListing, setSelectedListing] = useState<ListingMapPoint | null>(null);
   const [locationStatus, setLocationStatus] = useState<LocationStatus>('idle');
