@@ -34,13 +34,9 @@ export default function AdminEditListingPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/listings')
-      .then((r) => r.json())
-      .then((data) => {
-        const found = (data.listings as ListingRow[])?.find((l) => l.id === id);
-        if (!found) { setError('Listing not found.'); return; }
-        setListing(found);
-      })
+    fetch(`/api/admin/listings/${id}`)
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((data) => setListing(data as ListingRow))
       .catch(() => setError('Failed to load listing.'))
       .finally(() => setLoading(false));
   }, [id]);
