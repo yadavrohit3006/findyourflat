@@ -102,6 +102,29 @@ export async function POST(req: NextRequest) {
 
   const d = parsed.data;
 
+  // One active listing per phone number — prevents duplicate listings
+  if (d.contactPhone) {
+    const { data: existing, error: checkError } = await getSupabase()
+      .from('listings')
+      .select('id')
+      .eq('contact_phone', d.contactPhone)
+      .in('status', ['AVAILABLE', 'RESERVED'])
+      .limit(1)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('[POST /api/listings] phone check error', checkError);
+      return NextResponse.json({ error: checkError.message }, { status: 500 });
+    }
+
+    if (existing) {
+      return NextResponse.json(
+        { error: 'This phone number already has an active listing. Please mark your existing listing as Taken before posting a new one.' },
+        { status: 409 }
+      );
+    }
+  }
+
   const { data, error } = await getSupabase()
     .from('listings')
     .insert({
