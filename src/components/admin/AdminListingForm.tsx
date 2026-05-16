@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { track } from '@vercel/analytics';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -179,6 +180,13 @@ export function AdminListingForm({ defaultData, listingId }: AdminListingFormPro
         setSubmitError(err.error ?? 'Something went wrong. Please try again.');
         return;
       }
+
+      track(isEditMode ? 'listing_edited_admin' : 'listing_submitted_admin', {
+        city: data.city,
+        flatType: data.flatType,
+        listingType: data.listingType,
+        rentMonthly: data.rentMonthly,
+      });
 
       router.push('/admin/listings');
     } catch {

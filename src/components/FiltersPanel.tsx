@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { track } from '@vercel/analytics';
 import { Button } from '@/components/ui/Button';
 import { cn, listingTypeLabel, flatTypeLabel } from '@/lib/utils';
 import type { ListingFilters, ListingType, FlatType, FurnishingStatus } from '@/types';
@@ -106,7 +107,7 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
           {LISTING_TYPES.map((type) => (
             <button
               key={type}
-              onClick={() => toggleListingType(type)}
+              onClick={() => { toggleListingType(type); track('filter_applied', { filter: 'listingType', value: type }); }}
               className={cn(
                 'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
                 filters.listingTypes.includes(type)
@@ -127,7 +128,7 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
           {FLAT_TYPES.map((type) => (
             <button
               key={type}
-              onClick={() => toggleFlatType(type)}
+              onClick={() => { toggleFlatType(type); track('filter_applied', { filter: 'flatType', value: type }); }}
               className={cn(
                 'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
                 filters.flatTypes.includes(type)
@@ -148,7 +149,7 @@ export function FiltersPanel({ hook, listingCount, isLoading }: FiltersPanelProp
           {FURNISHING_STATUSES.map(({ value, label }) => (
             <button
               key={value}
-              onClick={() => toggleFurnishingStatus(value)}
+              onClick={() => { toggleFurnishingStatus(value); track('filter_applied', { filter: 'furnishing', value }); }}
               className={cn(
                 'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
                 filters.furnishingStatuses.includes(value)

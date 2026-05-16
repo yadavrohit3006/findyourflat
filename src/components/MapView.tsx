@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { track } from '@vercel/analytics';
 import Map, { type MapRef, NavigationControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -134,6 +135,12 @@ export default function MapView({ filters, onListingsChange, initialView }: MapV
 
   const handleMarkerClick = useCallback((listing: ListingMapPoint) => {
     setSelectedListing(listing);
+    track('listing_viewed', {
+      city: listing.city,
+      flatType: listing.flatType,
+      listingType: listing.listingType,
+      rentMonthly: listing.rentMonthly,
+    });
     mapRef.current?.flyTo({
       center: [listing.longitude, listing.latitude],
       duration: 400,

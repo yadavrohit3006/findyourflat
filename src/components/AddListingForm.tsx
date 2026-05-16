@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { track } from '@vercel/analytics';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -86,6 +87,13 @@ export function AddListingForm() {
         setSubmitError(err.error ?? 'Something went wrong. Please try again.');
         return;
       }
+
+      track('listing_submitted', {
+        city: data.city,
+        flatType: data.flatType,
+        listingType: data.listingType,
+        rentMonthly: data.rentMonthly,
+      });
 
       router.push('/?success=1');
     } catch {
