@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
-const EXTRACT_PROMPT = `You are analyzing a flat/apartment rental listing from India.
+function buildExtractPrompt(today: string) {
+  return `You are analyzing a flat/apartment rental listing from India.
 Extract the listing details and return ONLY a valid JSON object — no markdown, no explanation, no code fences.
 
 Return this exact JSON structure (use null for unknown/missing fields):
@@ -13,14 +14,16 @@ Return this exact JSON structure (use null for unknown/missing fields):
   "flatType": "1RK" or "1BHK" or "2BHK" or "3BHK" or "4BHK" or null,
   "furnishingStatus": "UNFURNISHED" or "SEMI_FURNISHED" or "FULLY_FURNISHED" or null,
   "genderPreference": "ANY" or "MALE_ONLY" or "FEMALE_ONLY",
-  "availableFrom": "YYYY-MM-DD" or null (if immediately available use today: 2026-04-23),
+  "availableFrom": "YYYY-MM-DD" if a specific future date is mentioned, or null if no date is mentioned,
   "contactName": "person's name or null",
   "contactPhone": "exactly 10 digits, no spaces/+91 prefix, or null",
   "contactEmail": "email address or null",
   "address": "street address or area description",
   "city": "city name",
   "neighborhood": "locality/area name or null"
-}`;
+}
+Today's date is ${today}. Only use a date if the listing explicitly mentions one.`;
+}
 
 function extractTextFromHTML(html: string): string {
   // Extract og: meta tags
@@ -66,6 +69,7 @@ export async function POST(req: NextRequest) {
   }
 
   const client = new Anthropic({ apiKey });
+  const EXTRACT_PROMPT = buildExtractPrompt(new Date().toISOString().split('T')[0]);
 
   let messageContent: Anthropic.MessageParam['content'];
 
