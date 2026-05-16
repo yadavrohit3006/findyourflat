@@ -83,6 +83,12 @@ function ListingCard({
         </div>
 
         <div className="flex-shrink-0 flex flex-col items-end gap-1">
+          <Link
+            href={`/admin/listings/${listing.id}/edit`}
+            className="rounded-xl text-xs font-medium px-3 py-1.5 transition-colors bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200"
+          >
+            Edit
+          </Link>
           <button
             onClick={toggle}
             disabled={busy}

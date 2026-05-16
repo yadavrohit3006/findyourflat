@@ -55,16 +55,20 @@ export interface ExtractedListing {
   address?: string | null;
   city?: string | null;
   neighborhood?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface AdminListingFormProps {
   defaultData?: ExtractedListing;
+  listingId?: string;
 }
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
-export function AdminListingForm({ defaultData }: AdminListingFormProps) {
+export function AdminListingForm({ defaultData, listingId }: AdminListingFormProps) {
   const router = useRouter();
+  const isEditMode = !!listingId;
   const [locationError, setLocationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [autoPickedLocation, setAutoPickedLocation] = useState<{ lat: number; lng: number; address: string; city: string } | null>(null);
@@ -85,7 +89,7 @@ export function AdminListingForm({ defaultData }: AdminListingFormProps) {
       flatType: (defaultData?.flatType as CreateListingSchema['flatType']) ?? undefined,
       furnishingStatus: (defaultData?.furnishingStatus as CreateListingSchema['furnishingStatus']) ?? undefined,
       genderPreference: (defaultData?.genderPreference as CreateListingSchema['genderPreference']) ?? undefined,
-      availableFrom: defaultData?.availableFrom ?? '',
+      availableFrom: defaultData?.availableFrom ?? new Date().toISOString().split('T')[0],
       contactName: defaultData?.contactName ?? '',
       contactPhone: defaultData?.contactPhone ?? '',
       contactEmail: defaultData?.contactEmail ?? '',
@@ -95,8 +99,24 @@ export function AdminListingForm({ defaultData }: AdminListingFormProps) {
     },
   });
 
-  // Auto-geocode extracted address on mount
+  // Seed lat/lng from defaultData when editing an existing listing
   useEffect(() => {
+    if (defaultData?.latitude && defaultData?.longitude) {
+      setValue('latitude', defaultData.latitude, { shouldValidate: true });
+      setValue('longitude', defaultData.longitude, { shouldValidate: true });
+      setAutoPickedLocation({
+        lat: defaultData.latitude,
+        lng: defaultData.longitude,
+        address: defaultData.address ?? '',
+        city: defaultData.city ?? '',
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-geocode extracted address on mount (skip if lat/lng already provided)
+  useEffect(() => {
+    if (defaultData?.latitude && defaultData?.longitude) return;
     const query = [defaultData?.neighborhood, defaultData?.city].filter(Boolean).join(', ')
       || defaultData?.address;
     if (!query) return;
@@ -146,8 +166,10 @@ export function AdminListingForm({ defaultData }: AdminListingFormProps) {
     }
 
     try {
-      const res = await fetch('/api/admin/listings', {
-        method: 'POST',
+      const url = isEditMode ? `/api/admin/listings/${listingId}` : '/api/admin/listings';
+      const method = isEditMode ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
@@ -335,7 +357,7 @@ export function AdminListingForm({ defaultData }: AdminListingFormProps) {
       )}
 
       <Button type="submit" size="lg" className="w-full bg-green-600 hover:bg-green-700" loading={isSubmitting}>
-        Approve & Publish
+        {isEditMode ? 'Save Changes' : 'Approve & Publish'}
       </Button>
     </form>
   );

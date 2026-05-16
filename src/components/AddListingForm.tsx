@@ -53,6 +53,9 @@ export function AddListingForm() {
   } = useForm<CreateListingSchema>({
     resolver: zodResolver(createListingSchema),
     mode: 'onTouched',
+    defaultValues: {
+      availableFrom: new Date().toISOString().split('T')[0],
+    },
   });
 
   function handleLocationPick(loc: { lat: number; lng: number; address: string; city: string }) {
