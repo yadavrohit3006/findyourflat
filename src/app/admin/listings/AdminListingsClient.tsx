@@ -45,17 +45,10 @@ function ListingCard({
   }
 
   return (
-    <div className={`bg-white rounded-2xl border p-4 shadow-sm ${listing.is_approved ? 'border-gray-200' : 'border-gray-100 opacity-70'}`}>
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-              listing.is_approved
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-500'
-            }`}>
-              {listing.is_approved ? 'Active' : 'Inactive'}
-            </span>
             <span className="text-xs text-gray-400">{formatDate(listing.created_at)}</span>
           </div>
           <h3 className="mt-1 font-semibold text-gray-900 text-sm leading-snug truncate">{listing.title}</h3>
@@ -105,6 +98,7 @@ function ListingCard({
 
 export function AdminListingsClient({ initialListings }: { initialListings: ListingRow[] }) {
   const [listings, setListings] = useState<ListingRow[]>(initialListings);
+  const [tab, setTab] = useState<'active' | 'inactive'>('active');
 
   function handleActivate(id: string) {
     setListings((prev) => prev.map((l) => l.id === id ? { ...l, is_approved: true } : l));
@@ -114,15 +108,14 @@ export function AdminListingsClient({ initialListings }: { initialListings: List
     setListings((prev) => prev.map((l) => l.id === id ? { ...l, is_approved: false } : l));
   }
 
-  const active = listings.filter((l) => l.is_approved).length;
+  const active = listings.filter((l) => l.is_approved);
+  const inactive = listings.filter((l) => !l.is_approved);
+  const shown = tab === 'active' ? active : inactive;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Listings</h1>
-          <p className="text-xs text-gray-400 mt-0.5">{active} active · {listings.length} total</p>
-        </div>
+        <h1 className="text-xl font-bold text-gray-900">Listings</h1>
         <Link
           href="/admin/new"
           className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium px-4 py-2 transition-colors"
@@ -131,15 +124,48 @@ export function AdminListingsClient({ initialListings }: { initialListings: List
         </Link>
       </div>
 
+      {/* Tabs */}
+      <div className="flex rounded-xl border border-gray-200 bg-white p-1 gap-1 w-fit">
+        <button
+          onClick={() => setTab('active')}
+          className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+            tab === 'active' ? 'bg-green-600 text-white' : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Active
+          <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-xs ${
+            tab === 'active' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-500'
+          }`}>
+            {active.length}
+          </span>
+        </button>
+        <button
+          onClick={() => setTab('inactive')}
+          className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+            tab === 'inactive' ? 'bg-gray-700 text-white' : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Inactive
+          <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-xs ${
+            tab === 'inactive' ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-500'
+          }`}>
+            {inactive.length}
+          </span>
+        </button>
+      </div>
+
       <section>
-        {listings.length === 0 ? (
+        {shown.length === 0 ? (
           <div className="text-center py-12 text-gray-400 text-sm">
-            No listings yet.{' '}
-            <Link href="/admin/new" className="text-sky-600 hover:underline">Add one →</Link>
+            {tab === 'active' ? (
+              <>No active listings. <Link href="/admin/new" className="text-sky-600 hover:underline">Add one →</Link></>
+            ) : (
+              'No inactive listings.'
+            )}
           </div>
         ) : (
           <div className="space-y-3">
-            {listings.map((l) => (
+            {shown.map((l) => (
               <ListingCard key={l.id} listing={l} onActivate={handleActivate} onDeactivate={handleDeactivate} />
             ))}
           </div>
