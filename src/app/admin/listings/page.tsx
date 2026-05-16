@@ -2,6 +2,8 @@ import { getSupabase } from '@/lib/supabase';
 import type { ListingRow } from '@/lib/supabase';
 import { AdminListingsClient } from './AdminListingsClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminListingsPage() {
   const { data, error } = await getSupabase()
     .from('listings')
