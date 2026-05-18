@@ -7,6 +7,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { ListingMarker } from './ListingMarker';
 import { ListingPopup } from './ListingPopup';
+import { ListingBottomSheet } from './ListingBottomSheet';
 import { LocationSearch } from './LocationSearch';
 import { useListings } from '@/hooks/useListings';
 import type { ListingFilters, ListingMapPoint, MapBounds } from '@/types';
@@ -40,6 +41,14 @@ export default function MapView({ filters, onListingsChange, initialView }: MapV
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const [selectedListing, setSelectedListing] = useState<ListingMapPoint | null>(null);
   const [locationStatus, setLocationStatus] = useState<LocationStatus>('idle');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Store resolved coords so we can fly once the map is ready
   const pendingCoordsRef = useRef<{ lng: number; lat: number } | null>(null);
@@ -189,13 +198,18 @@ export default function MapView({ filters, onListingsChange, initialView }: MapV
           />
         ))}
 
-        {selectedListing && (
+        {selectedListing && !isMobile && (
           <ListingPopup
             listing={selectedListing}
             onClose={() => setSelectedListing(null)}
           />
         )}
       </Map>
+
+      <ListingBottomSheet
+        listing={isMobile ? selectedListing : null}
+        onClose={() => setSelectedListing(null)}
+      />
 
       {/* Custom location button — positioned above NavigationControl (compass hidden, ~62px tall) */}
       <div className="absolute bottom-24 right-2.5 z-10">

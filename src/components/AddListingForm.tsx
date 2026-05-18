@@ -117,7 +117,7 @@ export function AddListingForm() {
             error={locationError ?? (errors.latitude?.message || errors.longitude?.message)}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Address"
               required
@@ -152,7 +152,7 @@ export function AddListingForm() {
 
         <div className="space-y-4">
           {/* Listing type + Flat type */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select
               label="Listing type"
               required
@@ -193,7 +193,7 @@ export function AddListingForm() {
             error={errors.description?.message}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Monthly Rent (₹)"
               type="number"
@@ -236,7 +236,7 @@ export function AddListingForm() {
             {...register('contactName')}
             error={errors.contactName?.message}
           />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Phone"
               type="tel"

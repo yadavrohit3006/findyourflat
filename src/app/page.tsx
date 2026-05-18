@@ -63,7 +63,7 @@ export default function HomePage() {
   const [listingCount, setListingCount] = useState(0);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <div className="relative h-[100dvh] w-full overflow-hidden">
       {/* Full-screen map — wrapped in Suspense for useSearchParams */}
       <Suspense fallback={<MapSkeleton />}>
         <MapWithCityFocus filters={filtersHook.filters} onListingsChange={setListingCount} />
