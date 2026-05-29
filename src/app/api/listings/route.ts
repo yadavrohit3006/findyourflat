@@ -51,9 +51,7 @@ export async function GET(req: NextRequest) {
 
   let query = getSupabase()
     .from('listings')
-    .select('id, latitude, longitude, rent_monthly, listing_type, flat_type, furnishing_status, status, title, neighborhood, city', {
-      count: 'exact',
-    })
+    .select('id, latitude, longitude, rent_monthly, listing_type, flat_type, furnishing_status, status, title, neighborhood, city')
     .eq('is_approved', true)
     .gte('latitude', south)
     .lte('latitude', north)
@@ -70,7 +68,7 @@ export async function GET(req: NextRequest) {
   if (statusParam) query = query.eq('status', statusParam);
   if (genderParam) query = query.eq('gender_preference', genderParam);
 
-  const { data, count, error } = await query;
+  const { data, error } = await query;
 
   if (error) {
     console.error('[GET /api/listings]', error);
@@ -78,7 +76,10 @@ export async function GET(req: NextRequest) {
   }
 
   const listings = (data as ListingRow[]).map(toMapPoint);
-  return NextResponse.json({ listings, total: count ?? listings.length });
+  return NextResponse.json(
+    { listings, total: listings.length },
+    { headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' } }
+  );
 }
 
 export async function POST(req: NextRequest) {

@@ -17,14 +17,15 @@ const listingFetcher = (url: string) =>
   });
 
 export function useListings(bounds: MapBounds | null, filters: ListingFilters) {
-  const debouncedBounds = useDebounce(bounds, 300);
-  const debouncedFilters = useDebounce(filters, 300);
+  const debouncedBounds = useDebounce(bounds, 200);
+  const debouncedFilters = useDebounce(filters, 200);
 
   const key = buildKey(debouncedBounds, debouncedFilters);
 
   const { data, isLoading, error } = useSWR<ApiListingsResponse>(key, fetcher, {
-    keepPreviousData: true,  // prevent flicker while panning
+    keepPreviousData: true,
     revalidateOnFocus: false,
+    dedupingInterval: 30_000,
   });
 
   return {
@@ -39,7 +40,7 @@ export function useListing(id: string | null) {
   const { data, isLoading, error } = useSWR<Listing>(
     id ? `/api/listings/${id}` : null,
     listingFetcher,
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false, dedupingInterval: 60_000 }
   );
 
   return { listing: data ?? null, isLoading, error };
