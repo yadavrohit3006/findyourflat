@@ -146,6 +146,7 @@ export async function POST(req: NextRequest) {
       contact_email: d.contactEmail || null,
       contact_phone: d.contactPhone ?? null,
       source_url: null,
+      source: 'PUBLIC',
       is_approved: false,
     })
     .select()

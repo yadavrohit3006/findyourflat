@@ -40,5 +40,6 @@ export interface ListingRow {
   contact_email: string | null;
   contact_phone: string | null;
   source_url: string | null;
+  source: 'PUBLIC' | 'ADMIN';
   is_approved: boolean;
 }

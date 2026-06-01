@@ -60,6 +60,11 @@ function ListingCard({
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">{listing.flat_type}</span>
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 capitalize">{listing.furnishing_status.replace('_', ' ').toLowerCase()}</span>
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">{listing.gender_preference.replace('_', ' ')}</span>
+            {listing.source === 'ADMIN' ? (
+              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-purple-700">Admin</span>
+            ) : (
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">User</span>
+            )}
           </div>
           {(listing.contact_phone || listing.contact_email || listing.contact_name) && (
             <p className="mt-2 text-xs text-gray-500">
